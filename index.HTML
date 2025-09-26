@@ -185,4 +185,63 @@
   background:#f8e2cc; /* skin */
   margin-top:-6px;
 }
+<div class="character fullbody">
+  <div class="head">
+    <div class="hair brown"></div>
+    <div class="eyes">
+      <div class="eye blue"></div>
+      <div class="eye blue"></div>
+    </div>
+    <div class="lips glossy"></div>
+  </div>
+  <div class="torso white-tank"></div>
+  <div class="skirt blue-jean"></div>
+  <div class="legs skin"></div>
+  <div class="platform first">1</div>
+</div>
+.character.fullbody {
+  height:360px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+.hair.brown {
+  background:linear-gradient(90deg,#6b3f1e,#462712);
+}
+.eye.blue {background:#1e90ff;}
+.lips.glossy {
+  width:40px;height:10px;border-radius:5px;
+  background:linear-gradient(180deg,#ffb3b3,#ff8080);
+}
+.torso.white-tank {
+  width:70px;height:80px;background:#fff;border-radius:10px;
+}
+.skirt.blue-jean {
+  width:80px;height:50px;background:#3a6da0;border-radius:8px;
+}
+.legs.skin {
+  width:20px;height:80px;background:#f3dbc1;margin-top:-6px;
+}
+<div class="character fullbody">
+  <div class="head">
+    <div class="hair blond"></div>
+    <div class="eyes">
+      <div class="eye brown"></div>
+      <div class="eye brown"></div>
+    </div>
+    <div class="lips big"></div>
+  </div>
+  <div class="dress weird"></div>
+  <div class="legs skin"></div>
+  <div class="platform second">2</div>
+</div>
+.hair.blond {
+  background:linear-gradient(90deg,#d9b700,#f9e57a);
+}
+.eye.brown {background:brown;}
+.lips.big {width:50px;height:14px;border-radius:7px;background:#e59999;}
+.dress.weird {
+  width:80px;height:130px;background:linear-gradient(180deg,#c9b6d3,#a690b9);border-radius:12px;
+}
 
