@@ -1,0 +1,169 @@
+<!-- Updated index.html to make podium girls lighter skin tone -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Roblox Brain Rot Profile — First Place</title>
+  <style>
+    :root{
+      --bg:#1e90ff; /* blue background */
+      --accent-pink:#ff7bb0;
+      --accent-yellow:#ffdf5d;
+      --text:#08345b;
+      --panel: rgba(255,255,255,0.95);
+    }
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:var(--bg); color:var(--text);}
+    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:32px}
+    .card{width:1000px;max-width:98%;background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.85));border-radius:18px;box-shadow:0 20px 40px rgba(2,6,23,0.25);overflow:hidden}
+    header{padding:28px 36px;display:flex;align-items:center;gap:18px}
+    .avatar{width:120px;height:120px;border-radius:18px;background:linear-gradient(135deg,var(--accent-pink),var(--accent-yellow));display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -10px 40px rgba(0,0,0,0.07)}
+    .avatar .initial{font-weight:700;font-size:40px;color:white;text-shadow:0 2px 0 rgba(0,0,0,0.08)}
+    .meta h1{margin:0;font-size:22px}
+    .meta p{margin:6px 0 0;color:rgba(0,0,0,0.6)}
+
+    main{padding:18px 36px 40px}
+    .scene{background:transparent;border-radius:12px;padding:16px}
+
+    .stage{display:flex;gap:18px;align-items:flex-end;justify-content:center;padding:28px 6px}
+    .podium{width:220px;height:220px;position:relative;display:flex;align-items:flex-end;justify-content:center}
+    .platform{width:100%;height:90px;border-radius:12px 12px 6px 6px;background:linear-gradient(180deg,#ddd,#bbb);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,0,0,0.15)}
+    .platform.first{height:130px;background:linear-gradient(180deg,var(--accent-yellow),#e6c94a)}
+    .platform.second{height:110px;background:linear-gradient(180deg,#e6e6ff,#cfcfff)}
+    .platform.third{height:100px;background:linear-gradient(180deg,#ffe6f0,#ffcee6)}
+
+    .character{width:120px;height:150px;display:flex;flex-direction:column;align-items:center;gap:8px}
+    /* lighter skin tone */
+    .head{width:78px;height:78px;border-radius:20px;background:#f8e0c6;display:flex;align-items:center;justify-content:center;position:relative}
+    .hair{position:absolute;top:0;left:0;width:100%;height:54px;border-radius:18px;background:linear-gradient(90deg,#6b3f1e,#462712);} /* brown hair */
+    .eyes{width:66px;display:flex;justify-content:space-between;padding:0 6px;margin-top:18px}
+    .eye{width:16px;height:16px;border-radius:50%;background:#1e90ff} /* blue eyes */
+    .smile{height:8px;width:36px;border-radius:4px;background:#2b1f16;margin-top:6px}
+    .tears{height:22px;width:8px;background:linear-gradient(180deg,#9ad7ff,#3ab1ff);border-radius:6px;margin-top:6px}
+
+    .body{width:86px;height:56px;border-radius:12px;background:linear-gradient(180deg,#fff,#f2f2f2);display:flex;align-items:center;justify-content:center}
+
+    .bg-creatures{position:absolute;inset:0;pointer-events:none}
+    .creature{position:absolute;filter:drop-shadow(0 6px 16px rgba(0,0,0,0.2));transform-origin:center}
+
+    footer{padding:18px 36px;border-top:1px dashed rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center}
+    @media (max-width:720px){
+      .stage{flex-direction:column;align-items:center}
+      .podium{width:80%;height:160px}
+      .avatar{width:84px;height:84px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="main">
+      <header>
+        <div class="avatar" aria-hidden="true"><div class="initial">A</div></div>
+        <div class="meta">
+          <h1>Alias: BrainRotQueen (13)</h1>
+          <p>Roblox profile theme • "Steal a Brain Rot" fan aesthetic — blue / yellow / pink</p>
+        </div>
+      </header>
+
+      <main>
+        <section class="scene" aria-label="podium scene">
+          <div style="position:relative;height:420px;">
+            <svg class="bg-creatures" width="100%" height="420" viewBox="0 0 1000 420" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+              <defs>
+                <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#74c0ff" stop-opacity="0.15"/><stop offset="100%" stop-color="#6ec6ff" stop-opacity="0"/></linearGradient>
+              </defs>
+              <rect x="0" y="0" width="1000" height="420" fill="url(#g1)"/>
+              <!-- big number 67 -->
+              <text x="500" y="200" text-anchor="middle" font-size="180" fill="rgba(255,255,255,0.2)" font-weight="bold">67</text>
+
+              <!-- brain rot characters -->
+              <g transform="translate(70,40)">
+                <g class="creature" transform="translate(50,30) scale(1.05)">
+                  <ellipse cx="0" cy="0" rx="36" ry="28" fill="#ffd5f0"/>
+                  <circle cx="-8" cy="-2" r="6" fill="#3b2b3a"/>
+                  <circle cx="12" cy="2" r="4" fill="#3b2b3a"/>
+                </g>
+                <g class="creature" transform="translate(160,10) scale(1.2)">
+                  <ellipse cx="0" cy="0" rx="44" ry="34" fill="#fff2a8"/>
+                  <circle cx="-10" cy="-6" r="7" fill="#3b2b3a"/>
+                </g>
+                <g class="creature" transform="translate(300,55) scale(0.95)">
+                  <ellipse cx="0" cy="0" rx="40" ry="30" fill="#cde7ff"/>
+                  <circle cx="-6" cy="-4" r="6" fill="#3b2b3a"/>
+                </g>
+              </g>
+            </svg>
+
+            <div class="stage" style="position:absolute;left:0;right:0;bottom:18px;">
+              <!-- second place -->
+              <div class="podium" style="transform:translateY(12px);">
+                <div class="character">
+                  <div class="head">
+                    <div class="hair"></div>
+                    <div class="eyes">
+                      <div class="eye"></div>
+                      <div class="eye"></div>
+                    </div>
+                    <div class="tears"></div>
+                  </div>
+                  <div class="body"> <div>2nd</div></div>
+                  <div class="platform second">2</div>
+                </div>
+              </div>
+
+              <!-- first place -->
+              <div class="podium">
+                <div class="character" aria-label="13-year-old girl, lighter skin, brown hair, blue eyes, first place">
+                  <div class="head" style="background:#f0d8b6;">
+                    <div class="hair"></div>
+                    <div class="eyes">
+                      <div class="eye"></div>
+                      <div class="eye"></div>
+                    </div>
+                    <div class="smile"></div>
+                  </div>
+                  <div class="body" style="background:linear-gradient(180deg,var(--accent-pink),#ffd0e6);"> <strong>1st</strong></div>
+                  <div class="platform first">1</div>
+                </div>
+              </div>
+
+              <!-- third place -->
+              <div class="podium" style="transform:translateY(20px);">
+                <div class="character">
+                  <div class="head">
+                    <div class="hair"></div>
+                    <div class="eyes">
+                      <div class="eye"></div>
+                      <div class="eye"></div>
+                    </div>
+                    <div class="tears"></div>
+                  </div>
+                  <div class="body"> <div>3rd</div></div>
+                  <div class="platform third">3</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <section style="padding:12px 6px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:220px">
+            <h3 style="margin:4px 0 6px">About me</h3>
+            <p style="margin:0;color:#16324a;">Hi — I'm a 13-year-old Roblox fan who loves brain rot aesthetics, bright colors, and creative roleplay. This is a playful, themed profile page made for fun.</p>
+          </div>
+          <div style="min-width:180px">
+            <h3 style="margin:4px 0 6px">Follow</h3>
+            <p style="margin:0">Roblox: <em>your-username</em> • Other socials: replace links in the HTML</p>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <div>Made with 💖 — customizable template</div>
+        <div style="font-size:13px;color:rgba(0,0,0,0.5)">Theme: blue / yellow / pink</div>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
