@@ -1,247 +1,166 @@
-<!-- index.html with tall standing girls wearing described clothes -->
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Roblox Brain Rot Profile — First Place</title>
-  <style>
-    :root{
-      --bg:#1e90ff; /* blue background */
-      --accent-pink:#ff7bb0;
-      --accent-yellow:#ffdf5d;
-      --text:#08345b;
-    }
-    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:var(--bg); color:var(--text);}
-    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:32px}
-    .card{width:1000px;max-width:98%;background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.85));border-radius:18px;box-shadow:0 20px 40px rgba(2,6,23,0.25);overflow:hidden}
-    header{padding:28px 36px;display:flex;align-items:center;gap:18px}
-    .avatar{width:120px;height:120px;border-radius:18px;background:linear-gradient(135deg,var(--accent-pink),var(--accent-yellow));display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -10px 40px rgba(0,0,0,0.07)}
-    .avatar .initial{font-weight:700;font-size:40px;color:white;text-shadow:0 2px 0 rgba(0,0,0,0.08)}
-    .meta h1{margin:0;font-size:22px}
-    .meta p{margin:6px 0 0;color:rgba(0,0,0,0.6)}
-
-    main{padding:18px 36px 40px}
-    .scene{background:transparent;border-radius:12px;padding:16px}
-
-    .stage{display:flex;gap:18px;align-items:flex-end;justify-content:center;padding:28px 6px}
-    .podium{width:220px;position:relative;display:flex;align-items:flex-end;justify-content:center}
-    .platform{width:100%;height:90px;border-radius:12px 12px 6px 6px;background:linear-gradient(180deg,#ddd,#bbb);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,0,0,0.15)}
-    .platform.first{height:130px;background:linear-gradient(180deg,var(--accent-yellow),#e6c94a)}
-    .platform.second{height:110px;background:linear-gradient(180deg,#e6e6ff,#cfcfff)}
-    .platform.third{height:100px;background:linear-gradient(180deg,#ffe6f0,#ffcee6)}
-
-    .character{width:120px;height:220px;display:flex;flex-direction:column;align-items:center;gap:8px}
-    .head{width:78px;height:78px;border-radius:20px;background:#f8e2cc;display:flex;align-items:center;justify-content:center;position:relative}
-    .hair{position:absolute;top:0;left:0;width:100%;height:54px;border-radius:18px;background:linear-gradient(90deg,#d9b700,#f9e57a);} /* default blond hair, center changes inline */
-    .eyes{width:66px;display:flex;justify-content:space-between;padding:0 6px;margin-top:18px}
-    .eye{width:16px;height:16px;border-radius:50%;background:#1e90ff}
-    .lips{width:40px;height:10px;border-radius:5px;background:#d9897a;margin-top:4px}
-    .body{width:86px;height:100px;border-radius:12px;background:linear-gradient(180deg,#fff,#f2f2f2);display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px}
-
-    /* animation for 67 */
-    @keyframes floatFade{
-      0%{opacity:0.3;transform:translateY(0) scale(1)}
-      50%{opacity:0.9;transform:translateY(-10px) scale(1.05)}
-      100%{opacity:0.3;transform:translateY(0) scale(1)}
-    }
-    .bg67{
-      fill:#ff00aa;font-weight:bold;animation:floatFade 4s ease-in-out infinite;
-    }
-    .bg-creatures{position:absolute;inset:0;pointer-events:none}
-
-    footer{padding:18px 36px;border-top:1px dashed rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center}
-    @media (max-width:720px){
-      .stage{flex-direction:column;align-items:center}
-      .podium{width:80%}
-      .avatar{width:84px;height:84px}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brain Rot Podium</title>
+<style>
+  :root {
+    --bg:#1e90ff;
+    --pink67:#ff69b4;
+  }
+  html,body {
+    margin:0;
+    background:var(--bg);
+    font-family:sans-serif;
+    height:100%;
+  }
+  /* repeating 67 background */
+  body::before {
+    content:"67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67";
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    font-size:60px;
+    line-height:60px;
+    color:var(--pink67);
+    opacity:0.15;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+    z-index:-1;
+  }
+  .stage {
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+    gap:60px;
+    padding-top:60px;
+  }
+  .podium {
+    width:180px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .platform {
+    width:100%;
+    height:60px;
+    border-radius:12px 12px 6px 6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#000;
+    font-weight:bold;
+    box-shadow:0 4px 12px rgba(0,0,0,0.2);
+  }
+  .first {height:90px;background:gold;}
+  .second {height:80px;background:silver;}
+  .third {height:70px;background:#cd7f32;}
+  /* Full body character */
+  .character {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin-bottom:-10px;
+  }
+  .head {
+    width:70px;height:70px;border-radius:50%;
+    position:relative;
+  }
+  .eyes {
+    display:flex;justify-content:space-between;width:36px;position:absolute;bottom:20px;left:17px;
+  }
+  .eye {width:8px;height:8px;border-radius:50%;}
+  .lips {
+    width:30px;height:8px;border-radius:4px;position:absolute;bottom:8px;left:20px;
+  }
+  .torso, .dress, .skirt, .legs {
+    display:block;
+  }
+  .torso {
+    width:60px;height:80px;border-radius:8px 8px 0 0;
+  }
+  .skirt {
+    width:70px;height:50px;border-radius:0 0 10px 10px;margin-top:-8px;
+  }
+  .legs {
+    display:flex;gap:10px;margin-top:-4px;
+  }
+  .leg {
+    width:12px;height:80px;border-radius:6px;
+  }
+  /* specific styles */
+  /* center girl */
+  .center .head {
+    background:#f2d1b3;
+  }
+  .center .hair {
+    position:absolute;top:0;left:0;width:100%;height:50%;border-radius:50% 50% 20% 20%;
+    background:linear-gradient(90deg,#6b3f1e,#462712);
+  }
+  .center .eye {background:#1e90ff;}
+  .center .lips {background:linear-gradient(180deg,#ffb3b3,#ff8080);}
+  .center .torso {background:#fff;}
+  .center .skirt {background:#3a6da0;}
+  .center .leg {background:#f2d1b3;}
+  /* side girls */
+  .side .head {
+    background:#f9f5f5;
+  }
+  .side .hair {
+    position:absolute;top:0;left:0;width:100%;height:50%;border-radius:50% 50% 20% 20%;
+    background:linear-gradient(90deg,#d9b700,#f9e57a);
+  }
+  .side .eye {background:brown;}
+  .side .lips {background:#e59999;}
+  .side .dress {
+    width:70px;height:130px;border-radius:10px;background:linear-gradient(180deg,#c9b6d3,#a690b9);
+  }
+  .side .leg {background:#f9f5f5;}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card" role="main">
-      <header>
-        <div class="avatar" aria-hidden="true"><div class="initial">A</div></div>
-        <div class="meta">
-          <h1>Alias: BrainRotQueen (13)</h1>
-          <p>Roblox profile theme • "Steal a Brain Rot" fan aesthetic — blue / yellow / pink</p>
+  <div class="stage">
+    <!-- second place -->
+    <div class="podium">
+      <div class="character side">
+        <div class="head">
+          <div class="hair"></div>
+          <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+          <div class="lips"></div>
         </div>
-      </header>
-
-      <main>
-        <section class="scene" aria-label="podium scene">
-          <div style="position:relative;height:480px;">
-            <svg class="bg-creatures" width="100%" height="480" viewBox="0 0 1000 480" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-              <rect x="0" y="0" width="1000" height="480" fill="transparent"/>
-              <text x="100" y="100" class="bg67" font-size="80">67</text>
-              <text x="300" y="200" class="bg67" font-size="140">67</text>
-              <text x="600" y="150" class="bg67" font-size="100">67</text>
-              <text x="800" y="250" class="bg67" font-size="120">67</text>
-              <text x="500" y="350" class="bg67" font-size="180">67</text>
-            </svg>
-
-            <div class="stage" style="position:absolute;left:0;right:0;bottom:18px;">
-              <!-- second place pale blond weird dress -->
-              <div class="podium" style="transform:translateY(0);">
-                <div class="character">
-                  <div class="head">
-                    <div class="hair"></div>
-                    <div class="eyes">
-                      <div class="eye" style="background:brown"></div>
-                      <div class="eye" style="background:brown"></div>
-                    </div>
-                    <div class="lips" style="background:#e59999"></div>
-                  </div>
-                  <div class="body" style="background:linear-gradient(180deg,#c9b6d3,#a690b9);">Weird Dress</div>
-                  <div class="platform second">2</div>
-                </div>
-              </div>
-
-              <!-- first place center girl jean skirt white tank top brown hair blue eyes glossy lips -->
-              <div class="podium">
-                <div class="character" aria-label="center girl with jean skirt and tank top">
-                  <div class="head" style="background:#f3dbc1;">
-                    <div class="hair" style="background:linear-gradient(90deg,#6b3f1e,#462712);"></div>
-                    <div class="eyes">
-                      <div class="eye"></div>
-                      <div class="eye"></div>
-                    </div>
-                    <div class="lips" style="background:#ffb3b3"></div>
-                  </div>
-                  <div class="body" style="flex-direction:column;background:linear-gradient(180deg,#ffffff,#d9f0ff);height:100px;">
-                    <div style="font-size:12px;color:#333;">White Tank Top</div>
-                    <div style="width:100%;height:40px;background:#3a6da0;color:#fff;line-height:40px;border-radius:6px;margin-top:4px;">Jean Skirt</div>
-                  </div>
-                  <div class="platform first">1</div>
-                </div>
-              </div>
-
-              <!-- third place pale blond weird dress -->
-              <div class="podium" style="transform:translateY(0);">
-                <div class="character">
-                  <div class="head">
-                    <div class="hair"></div>
-                    <div class="eyes">
-                      <div class="eye" style="background:brown"></div>
-                      <div class="eye" style="background:brown"></div>
-                    </div>
-                    <div class="lips" style="background:#e59999"></div>
-                  </div>
-                  <div class="body" style="background:linear-gradient(180deg,#d4c0d0,#b4a0b4);">Weird Dress</div>
-                  <div class="platform third">3</div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        <section style="padding:12px 6px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-          <div style="flex:1;min-width:220px">
-            <h3 style="margin:4px 0 6px">About me</h3>
-            <p style="margin:0;color:#16324a;">Hi — I'm a 13-year-old Roblox fan who loves brain rot aesthetics, bright colors, and creative roleplay. This is a playful, themed profile page made for fun.</p>
-          </div>
-          <div style="min-width:180px">
-            <h3 style="margin:4px 0 6px">Follow</h3>
-            <p style="margin:0">Roblox: <em>your-username</em> • Other socials: replace links in the HTML</p>
-          </div>
-        </section>
-      </main>
-
-      <footer>
-        <div>Made with 💖 — customizable template</div>
-        <div style="font-size:13px;color:rgba(0,0,0,0.5)">Theme: blue / yellow / pink</div>
-      </footer>
+        <div class="dress"></div>
+        <div class="legs"><div class="leg"></div><div class="leg"></div></div>
+      </div>
+      <div class="platform second">2</div>
+    </div>
+    <!-- first place -->
+    <div class="podium">
+      <div class="character center">
+        <div class="head">
+          <div class="hair"></div>
+          <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+          <div class="lips"></div>
+        </div>
+        <div class="torso"></div>
+        <div class="skirt"></div>
+        <div class="legs"><div class="leg"></div><div class="leg"></div></div>
+      </div>
+      <div class="platform first">1</div>
+    </div>
+    <!-- third place -->
+    <div class="podium">
+      <div class="character side">
+        <div class="head">
+          <div class="hair"></div>
+          <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+          <div class="lips"></div>
+        </div>
+        <div class="dress"></div>
+        <div class="legs"><div class="leg"></div><div class="leg"></div></div>
+      </div>
+      <div class="platform third">3</div>
     </div>
   </div>
 </body>
 </html>
-<div class="character fullbody">
-  <div class="head">…</div>
-  <div class="torso white-tank"></div>
-  <div class="skirt blue-jean"></div>
-  <div class="legs"></div>
-</div>
-<div class="character fullbody">
-  <div class="head">…</div>
-  <div class="torso white-tank"></div>
-  <div class="skirt blue-jean"></div>
-  <div class="legs"></div>
-</div>
-.character.fullbody {height:300px}
-.torso.white-tank {
-  width:70px;height:80px;
-  background:#fff; /* white tank */
-  border-radius:10px;
-}
-.skirt.blue-jean {
-  width:80px;height:50px;
-  background:#3a6da0; /* jean skirt */
-  border-radius:8px;
-}
-.legs {
-  width:20px;height:80px;
-  background:#f8e2cc; /* skin */
-  margin-top:-6px;
-}
-<div class="character fullbody">
-  <div class="head">
-    <div class="hair brown"></div>
-    <div class="eyes">
-      <div class="eye blue"></div>
-      <div class="eye blue"></div>
-    </div>
-    <div class="lips glossy"></div>
-  </div>
-  <div class="torso white-tank"></div>
-  <div class="skirt blue-jean"></div>
-  <div class="legs skin"></div>
-  <div class="platform first">1</div>
-</div>
-.character.fullbody {
-  height:360px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:4px;
-}
-.hair.brown {
-  background:linear-gradient(90deg,#6b3f1e,#462712);
-}
-.eye.blue {background:#1e90ff;}
-.lips.glossy {
-  width:40px;height:10px;border-radius:5px;
-  background:linear-gradient(180deg,#ffb3b3,#ff8080);
-}
-.torso.white-tank {
-  width:70px;height:80px;background:#fff;border-radius:10px;
-}
-.skirt.blue-jean {
-  width:80px;height:50px;background:#3a6da0;border-radius:8px;
-}
-.legs.skin {
-  width:20px;height:80px;background:#f3dbc1;margin-top:-6px;
-}
-<div class="character fullbody">
-  <div class="head">
-    <div class="hair blond"></div>
-    <div class="eyes">
-      <div class="eye brown"></div>
-      <div class="eye brown"></div>
-    </div>
-    <div class="lips big"></div>
-  </div>
-  <div class="dress weird"></div>
-  <div class="legs skin"></div>
-  <div class="platform second">2</div>
-</div>
-.hair.blond {
-  background:linear-gradient(90deg,#d9b700,#f9e57a);
-}
-.eye.brown {background:brown;}
-.lips.big {width:50px;height:14px;border-radius:7px;background:#e59999;}
-.dress.weird {
-  width:80px;height:130px;background:linear-gradient(180deg,#c9b6d3,#a690b9);border-radius:12px;
-}
-
