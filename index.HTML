@@ -1,4 +1,4 @@
-<!-- index.html with taller podium characters -->
+<!-- index.html updated: side girls weird dresses, pale skin, brown eyes, blond eyebrows, big lips, blond hair; center girl blue jean skirt + white tank top, brown hair, blue eyes, glossy lips -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -32,15 +32,15 @@
     .platform.second{height:110px;background:linear-gradient(180deg,#e6e6ff,#cfcfff)}
     .platform.third{height:100px;background:linear-gradient(180deg,#ffe6f0,#ffcee6)}
 
-    .character{width:140px;height:230px;display:flex;flex-direction:column;align-items:center;gap:8px} /* taller characters */
-    .head{width:78px;height:78px;border-radius:20px;background:#f8e2cc;display:flex;align-items:center;justify-content:center;position:relative}
-    .hair{position:absolute;top:0;left:0;width:100%;height:54px;border-radius:18px;background:linear-gradient(90deg,#6b3f1e,#462712);} /* brown hair */
+    .character{width:140px;height:230px;display:flex;flex-direction:column;align-items:center;gap:8px}
+    .head{width:78px;height:78px;border-radius:20px;display:flex;align-items:center;justify-content:center;position:relative}
     .eyes{width:66px;display:flex;justify-content:space-between;padding:0 6px;margin-top:18px}
-    .eye{width:16px;height:16px;border-radius:50%;background:#1e90ff} /* blue eyes */
-    .smile{height:8px;width:36px;border-radius:4px;background:#2b1f16;margin-top:6px}
+    .eye{width:16px;height:16px;border-radius:50%}
+    .smile,.lips{height:10px;width:40px;border-radius:6px;margin-top:6px}
+    .lips{background:#e88c8c;box-shadow:0 0 4px rgba(255,255,255,0.6) inset}
     .tears{height:22px;width:8px;background:linear-gradient(180deg,#9ad7ff,#3ab1ff);border-radius:6px;margin-top:6px}
 
-    .body{width:86px;height:100px;border-radius:12px;background:linear-gradient(180deg,#fff,#f2f2f2);display:flex;align-items:center;justify-content:center}
+    .body{width:100px;height:100px;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px}
 
     @keyframes floatFade{
       0%{opacity:0.3;transform:translateY(0) scale(1)}
@@ -88,50 +88,50 @@
             </svg>
 
             <div class="stage" style="position:absolute;left:0;right:0;bottom:18px;">
-              <!-- second place -->
+              <!-- second place pale blond weird dress -->
               <div class="podium" style="transform:translateY(12px);">
                 <div class="character">
-                  <div class="head">
-                    <div class="hair"></div>
+                  <div class="head" style="background:#fdf5f0;">
+                    <div class="hair" style="background:linear-gradient(90deg,#f9e99d,#f9e99d);height:60px"></div>
                     <div class="eyes">
-                      <div class="eye"></div>
-                      <div class="eye"></div>
+                      <div class="eye" style="background:brown"></div>
+                      <div class="eye" style="background:brown"></div>
                     </div>
-                    <div class="tears"></div>
+                    <div class="lips"></div>
                   </div>
-                  <div class="body"> <div>2nd</div></div>
+                  <div class="body" style="background:linear-gradient(180deg,#c9c9ff,#a9a9f9);">Weird Dress</div>
                   <div class="platform second">2</div>
                 </div>
               </div>
 
-              <!-- first place -->
+              <!-- first place center girl with blue jean skirt and white tank top -->
               <div class="podium">
-                <div class="character" aria-label="13-year-old girl, tan skin, brown hair, blue eyes, first place">
+                <div class="character" aria-label="13-year-old girl center">
                   <div class="head" style="background:#deb887;">
-                    <div class="hair"></div>
+                    <div class="hair" style="background:linear-gradient(90deg,#6b3f1e,#462712);"></div>
                     <div class="eyes">
-                      <div class="eye"></div>
-                      <div class="eye"></div>
+                      <div class="eye" style="background:#1e90ff"></div>
+                      <div class="eye" style="background:#1e90ff"></div>
                     </div>
-                    <div class="smile"></div>
+                    <div class="lips"></div>
                   </div>
-                  <div class="body" style="background:linear-gradient(180deg,#fff,#add8e6);"> <strong>Blue Jean Skirt + White Tank Top</strong></div>
+                  <div class="body" style="background:linear-gradient(180deg,#ffffff,#add8e6);">Blue Jean Skirt + White Tank Top</div>
                   <div class="platform first">1</div>
                 </div>
               </div>
 
-              <!-- third place -->
+              <!-- third place pale blond weird dress -->
               <div class="podium" style="transform:translateY(20px);">
                 <div class="character">
-                  <div class="head">
-                    <div class="hair"></div>
+                  <div class="head" style="background:#fdf5f0;">
+                    <div class="hair" style="background:linear-gradient(90deg,#f9e99d,#f9e99d);height:60px"></div>
                     <div class="eyes">
-                      <div class="eye"></div>
-                      <div class="eye"></div>
+                      <div class="eye" style="background:brown"></div>
+                      <div class="eye" style="background:brown"></div>
                     </div>
-                    <div class="tears"></div>
+                    <div class="lips"></div>
                   </div>
-                  <div class="body"> <div>3rd</div></div>
+                  <div class="body" style="background:linear-gradient(180deg,#d9b9f9,#b999e9);">Weird Dress</div>
                   <div class="platform third">3</div>
                 </div>
               </div>
