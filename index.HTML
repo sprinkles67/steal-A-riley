@@ -176,3 +176,24 @@
 .leg {width:14px;height:140px;}     /* longer legs */
 .dress {width:80px;height:200px;}   /* much longer dress */
 .leg {width:14px;height:140px;}     /* longer legs */
+html, body {
+  margin:0;
+  height:100%;
+  font-family:sans-serif;
+  background:var(--bg);
+  position:relative;
+}
+
+/* overlay of 67s everywhere */
+body::before {
+  content:"67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67";
+  position:fixed;
+  inset:0;
+  font-size:60px;
+  line-height:60px;
+  color:#ff69b4; /* bright pink */
+  opacity:0.15;  /* adjust so it’s not overpowering */
+  white-space:pre-wrap;
+  word-wrap:break-word;
+  z-index:-1;
+}
