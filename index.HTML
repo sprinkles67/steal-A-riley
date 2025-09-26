@@ -1,4 +1,4 @@
-<!-- index.html updated: side girls weird dresses, pale skin, brown eyes, blond eyebrows, big lips, blond hair; center girl blue jean skirt + white tank top, brown hair, blue eyes, glossy lips -->
+<!-- index.html with tall standing girls wearing described clothes -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -11,7 +11,6 @@
       --accent-pink:#ff7bb0;
       --accent-yellow:#ffdf5d;
       --text:#08345b;
-      --panel: rgba(255,255,255,0.95);
     }
     html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:var(--bg); color:var(--text);}
     .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:32px}
@@ -26,40 +25,35 @@
     .scene{background:transparent;border-radius:12px;padding:16px}
 
     .stage{display:flex;gap:18px;align-items:flex-end;justify-content:center;padding:28px 6px}
-    .podium{width:220px;height:300px;position:relative;display:flex;align-items:flex-end;justify-content:center}
+    .podium{width:220px;position:relative;display:flex;align-items:flex-end;justify-content:center}
     .platform{width:100%;height:90px;border-radius:12px 12px 6px 6px;background:linear-gradient(180deg,#ddd,#bbb);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,0,0,0.15)}
     .platform.first{height:130px;background:linear-gradient(180deg,var(--accent-yellow),#e6c94a)}
     .platform.second{height:110px;background:linear-gradient(180deg,#e6e6ff,#cfcfff)}
     .platform.third{height:100px;background:linear-gradient(180deg,#ffe6f0,#ffcee6)}
 
-    .character{width:140px;height:230px;display:flex;flex-direction:column;align-items:center;gap:8px}
-    .head{width:78px;height:78px;border-radius:20px;display:flex;align-items:center;justify-content:center;position:relative}
+    .character{width:120px;height:220px;display:flex;flex-direction:column;align-items:center;gap:8px}
+    .head{width:78px;height:78px;border-radius:20px;background:#f8e2cc;display:flex;align-items:center;justify-content:center;position:relative}
+    .hair{position:absolute;top:0;left:0;width:100%;height:54px;border-radius:18px;background:linear-gradient(90deg,#d9b700,#f9e57a);} /* default blond hair, center changes inline */
     .eyes{width:66px;display:flex;justify-content:space-between;padding:0 6px;margin-top:18px}
-    .eye{width:16px;height:16px;border-radius:50%}
-    .smile,.lips{height:10px;width:40px;border-radius:6px;margin-top:6px}
-    .lips{background:#e88c8c;box-shadow:0 0 4px rgba(255,255,255,0.6) inset}
-    .tears{height:22px;width:8px;background:linear-gradient(180deg,#9ad7ff,#3ab1ff);border-radius:6px;margin-top:6px}
+    .eye{width:16px;height:16px;border-radius:50%;background:#1e90ff}
+    .lips{width:40px;height:10px;border-radius:5px;background:#d9897a;margin-top:4px}
+    .body{width:86px;height:100px;border-radius:12px;background:linear-gradient(180deg,#fff,#f2f2f2);display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px}
 
-    .body{width:100px;height:100px;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px}
-
+    /* animation for 67 */
     @keyframes floatFade{
       0%{opacity:0.3;transform:translateY(0) scale(1)}
       50%{opacity:0.9;transform:translateY(-10px) scale(1.05)}
       100%{opacity:0.3;transform:translateY(0) scale(1)}
     }
     .bg67{
-      fill:#ff00aa;
-      font-weight:bold;
-      animation:floatFade 4s ease-in-out infinite;
+      fill:#ff00aa;font-weight:bold;animation:floatFade 4s ease-in-out infinite;
     }
-
     .bg-creatures{position:absolute;inset:0;pointer-events:none}
-    .creature{position:absolute;filter:drop-shadow(0 6px 16px rgba(0,0,0,0.2));transform-origin:center}
 
     footer{padding:18px 36px;border-top:1px dashed rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center}
     @media (max-width:720px){
       .stage{flex-direction:column;align-items:center}
-      .podium{width:80%;height:160px}
+      .podium{width:80%}
       .avatar{width:84px;height:84px}
     }
   </style>
@@ -77,9 +71,9 @@
 
       <main>
         <section class="scene" aria-label="podium scene">
-          <div style="position:relative;height:500px;">
-            <svg class="bg-creatures" width="100%" height="500" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-              <rect x="0" y="0" width="1000" height="500" fill="transparent"/>
+          <div style="position:relative;height:480px;">
+            <svg class="bg-creatures" width="100%" height="480" viewBox="0 0 1000 480" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+              <rect x="0" y="0" width="1000" height="480" fill="transparent"/>
               <text x="100" y="100" class="bg67" font-size="80">67</text>
               <text x="300" y="200" class="bg67" font-size="140">67</text>
               <text x="600" y="150" class="bg67" font-size="100">67</text>
@@ -89,54 +83,57 @@
 
             <div class="stage" style="position:absolute;left:0;right:0;bottom:18px;">
               <!-- second place pale blond weird dress -->
-              <div class="podium" style="transform:translateY(12px);">
+              <div class="podium" style="transform:translateY(0);">
                 <div class="character">
-                  <div class="head" style="background:#fdf5f0;">
-                    <div class="hair" style="background:linear-gradient(90deg,#f9e99d,#f9e99d);height:60px"></div>
+                  <div class="head">
+                    <div class="hair"></div>
                     <div class="eyes">
                       <div class="eye" style="background:brown"></div>
                       <div class="eye" style="background:brown"></div>
                     </div>
-                    <div class="lips"></div>
+                    <div class="lips" style="background:#e59999"></div>
                   </div>
-                  <div class="body" style="background:linear-gradient(180deg,#c9c9ff,#a9a9f9);">Weird Dress</div>
+                  <div class="body" style="background:linear-gradient(180deg,#c9b6d3,#a690b9);">Weird Dress</div>
                   <div class="platform second">2</div>
                 </div>
               </div>
 
-              <!-- first place center girl with blue jean skirt and white tank top -->
+              <!-- first place center girl jean skirt white tank top brown hair blue eyes glossy lips -->
               <div class="podium">
-                <div class="character" aria-label="13-year-old girl center">
-                  <div class="head" style="background:#deb887;">
+                <div class="character" aria-label="center girl with jean skirt and tank top">
+                  <div class="head" style="background:#f3dbc1;">
                     <div class="hair" style="background:linear-gradient(90deg,#6b3f1e,#462712);"></div>
                     <div class="eyes">
-                      <div class="eye" style="background:#1e90ff"></div>
-                      <div class="eye" style="background:#1e90ff"></div>
+                      <div class="eye"></div>
+                      <div class="eye"></div>
                     </div>
-                    <div class="lips"></div>
+                    <div class="lips" style="background:#ffb3b3"></div>
                   </div>
-                  <div class="body" style="background:linear-gradient(180deg,#ffffff,#add8e6);">Blue Jean Skirt + White Tank Top</div>
+                  <div class="body" style="flex-direction:column;background:linear-gradient(180deg,#ffffff,#d9f0ff);height:100px;">
+                    <div style="font-size:12px;color:#333;">White Tank Top</div>
+                    <div style="width:100%;height:40px;background:#3a6da0;color:#fff;line-height:40px;border-radius:6px;margin-top:4px;">Jean Skirt</div>
+                  </div>
                   <div class="platform first">1</div>
                 </div>
               </div>
 
               <!-- third place pale blond weird dress -->
-              <div class="podium" style="transform:translateY(20px);">
+              <div class="podium" style="transform:translateY(0);">
                 <div class="character">
-                  <div class="head" style="background:#fdf5f0;">
-                    <div class="hair" style="background:linear-gradient(90deg,#f9e99d,#f9e99d);height:60px"></div>
+                  <div class="head">
+                    <div class="hair"></div>
                     <div class="eyes">
                       <div class="eye" style="background:brown"></div>
                       <div class="eye" style="background:brown"></div>
                     </div>
-                    <div class="lips"></div>
+                    <div class="lips" style="background:#e59999"></div>
                   </div>
-                  <div class="body" style="background:linear-gradient(180deg,#d9b9f9,#b999e9);">Weird Dress</div>
+                  <div class="body" style="background:linear-gradient(180deg,#d4c0d0,#b4a0b4);">Weird Dress</div>
                   <div class="platform third">3</div>
                 </div>
               </div>
-            </div>
 
+            </div>
           </div>
         </section>
 
