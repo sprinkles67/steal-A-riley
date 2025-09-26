@@ -1,4 +1,4 @@
-<!-- Updated index.html to make podium girls lighter skin tone -->
+<!-- Updated index.html to add repeated 67 in background, blond pale sad girls with ugly dresses on 2nd/3rd, and blue jean skirt & white tank top for middle girl -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -23,7 +23,7 @@
     .meta p{margin:6px 0 0;color:rgba(0,0,0,0.6)}
 
     main{padding:18px 36px 40px}
-    .scene{background:transparent;border-radius:12px;padding:16px}
+    .scene{background:transparent;border-radius:12px;padding:16px;position:relative;overflow:hidden}
 
     .stage{display:flex;gap:18px;align-items:flex-end;justify-content:center;padding:28px 6px}
     .podium{width:220px;height:220px;position:relative;display:flex;align-items:flex-end;justify-content:center}
@@ -32,19 +32,29 @@
     .platform.second{height:110px;background:linear-gradient(180deg,#e6e6ff,#cfcfff)}
     .platform.third{height:100px;background:linear-gradient(180deg,#ffe6f0,#ffcee6)}
 
-    .character{width:120px;height:150px;display:flex;flex-direction:column;align-items:center;gap:8px}
-    /* lighter skin tone */
-    .head{width:78px;height:78px;border-radius:20px;background:#f8e0c6;display:flex;align-items:center;justify-content:center;position:relative}
-    .hair{position:absolute;top:0;left:0;width:100%;height:54px;border-radius:18px;background:linear-gradient(90deg,#6b3f1e,#462712);} /* brown hair */
+    .character{width:120px;height:180px;display:flex;flex-direction:column;align-items:center;gap:8px}
+    .head{width:78px;height:78px;border-radius:20px;display:flex;align-items:center;justify-content:center;position:relative}
+    .hair{position:absolute;top:0;left:0;width:100%;height:54px;border-radius:18px;background:linear-gradient(90deg,#6b3f1e,#462712);} /* brown hair default */
     .eyes{width:66px;display:flex;justify-content:space-between;padding:0 6px;margin-top:18px}
     .eye{width:16px;height:16px;border-radius:50%;background:#1e90ff} /* blue eyes */
     .smile{height:8px;width:36px;border-radius:4px;background:#2b1f16;margin-top:6px}
     .tears{height:22px;width:8px;background:linear-gradient(180deg,#9ad7ff,#3ab1ff);border-radius:6px;margin-top:6px}
 
-    .body{width:86px;height:56px;border-radius:12px;background:linear-gradient(180deg,#fff,#f2f2f2);display:flex;align-items:center;justify-content:center}
+    .body{width:86px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center}
 
     .bg-creatures{position:absolute;inset:0;pointer-events:none}
     .creature{position:absolute;filter:drop-shadow(0 6px 16px rgba(0,0,0,0.2));transform-origin:center}
+
+    .repeat67{
+      position:absolute;
+      inset:0;
+      font-size:100px;
+      color:rgba(255,255,255,0.05);
+      font-weight:bold;
+      line-height:100px;
+      white-space:pre-wrap;
+      pointer-events:none;
+    }
 
     footer{padding:18px 36px;border-top:1px dashed rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center}
     @media (max-width:720px){
@@ -67,14 +77,13 @@
 
       <main>
         <section class="scene" aria-label="podium scene">
+          <div class="repeat67">67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67</div>
           <div style="position:relative;height:420px;">
             <svg class="bg-creatures" width="100%" height="420" viewBox="0 0 1000 420" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
               <defs>
                 <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#74c0ff" stop-opacity="0.15"/><stop offset="100%" stop-color="#6ec6ff" stop-opacity="0"/></linearGradient>
               </defs>
               <rect x="0" y="0" width="1000" height="420" fill="url(#g1)"/>
-              <!-- big number 67 -->
-              <text x="500" y="200" text-anchor="middle" font-size="180" fill="rgba(255,255,255,0.2)" font-weight="bold">67</text>
 
               <!-- brain rot characters -->
               <g transform="translate(70,40)">
@@ -95,23 +104,23 @@
             </svg>
 
             <div class="stage" style="position:absolute;left:0;right:0;bottom:18px;">
-              <!-- second place -->
+              <!-- second place - pale depressed blond ugly dress -->
               <div class="podium" style="transform:translateY(12px);">
                 <div class="character">
-                  <div class="head">
-                    <div class="hair"></div>
+                  <div class="head" style="background:#fdf1de;">
+                    <div class="hair" style="background:linear-gradient(90deg,#f9e48b,#e8d46b);"></div>
                     <div class="eyes">
                       <div class="eye"></div>
                       <div class="eye"></div>
                     </div>
                     <div class="tears"></div>
                   </div>
-                  <div class="body"> <div>2nd</div></div>
+                  <div class="body" style="background:linear-gradient(180deg,#bbb,#999);">Ugly Dress</div>
                   <div class="platform second">2</div>
                 </div>
               </div>
 
-              <!-- first place -->
+              <!-- first place - blue jean skirt & white tank top -->
               <div class="podium">
                 <div class="character" aria-label="13-year-old girl, lighter skin, brown hair, blue eyes, first place">
                   <div class="head" style="background:#f0d8b6;">
@@ -122,23 +131,26 @@
                     </div>
                     <div class="smile"></div>
                   </div>
-                  <div class="body" style="background:linear-gradient(180deg,var(--accent-pink),#ffd0e6);"> <strong>1st</strong></div>
+                  <div class="body" style="background:linear-gradient(180deg,#ffffff,#f7f7f7);border-top-left-radius:6px;border-top-right-radius:6px;flex-direction:column;">
+                    <div style="font-size:12px;color:#333;">White Tank Top</div>
+                    <div style="width:86px;height:24px;background:linear-gradient(180deg,#4a7ac7,#355f9c);border-bottom-left-radius:12px;border-bottom-right-radius:12px;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;">Blue Jeans Skirt</div>
+                  </div>
                   <div class="platform first">1</div>
                 </div>
               </div>
 
-              <!-- third place -->
+              <!-- third place - pale depressed blond ugly dress -->
               <div class="podium" style="transform:translateY(20px);">
                 <div class="character">
-                  <div class="head">
-                    <div class="hair"></div>
+                  <div class="head" style="background:#fdf1de;">
+                    <div class="hair" style="background:linear-gradient(90deg,#f9e48b,#e8d46b);"></div>
                     <div class="eyes">
                       <div class="eye"></div>
                       <div class="eye"></div>
                     </div>
                     <div class="tears"></div>
                   </div>
-                  <div class="body"> <div>3rd</div></div>
+                  <div class="body" style="background:linear-gradient(180deg,#bbb,#999);">Ugly Dress</div>
                   <div class="platform third">3</div>
                 </div>
               </div>
