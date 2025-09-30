@@ -1,199 +1,191 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Brain Rot Podium</title>
+<meta charset="utf-8">
+<title>Brain Rot Race</title>
 <style>
-  :root {
-    --bg:#1e90ff;
-    --pink67:#ff69b4;
-  }
-  html,body {
+  body {
     margin:0;
-    background:var(--bg);
     font-family:sans-serif;
-    height:100%;
+    height:100vh;
+    background:linear-gradient(135deg, #ffb6e6 50%, #87cefa 50%);
+    overflow:hidden;
+    position:relative;
   }
   /* repeating 67 background */
   body::before {
-    content:"67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67";
-    position:fixed;
-    top:0;left:0;right:0;bottom:0;
+    content:"67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67";
+    position:absolute;
+    inset:0;
     font-size:60px;
     line-height:60px;
-    color:var(--pink67);
+    color:#ff69b4;
     opacity:0.15;
     white-space:pre-wrap;
     word-wrap:break-word;
-    z-index:-1;
+    z-index:0;
   }
-  .stage {
-    display:flex;
-    justify-content:center;
-    align-items:flex-end;
-    gap:60px;
-    padding-top:60px;
-  }
-  .podium {
-    width:180px;
-    text-align:center;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-  }
-  .platform {
-    width:100%;
-    height:60px;
-    border-radius:12px 12px 6px 6px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#000;
-    font-weight:bold;
-    box-shadow:0 4px 12px rgba(0,0,0,0.2);
-  }
-  .first {height:90px;background:gold;}
-  .second {height:80px;background:silver;}
-  .third {height:70px;background:#cd7f32;}
-  /* Full body character */
-  .character {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    margin-bottom:-10px;
-  }
-  .head {
-    width:70px;height:70px;border-radius:50%;
+  .game {
     position:relative;
+    width:100%;
+    height:100%;
+    z-index:1;
   }
-  .eyes {
-    display:flex;justify-content:space-between;width:36px;position:absolute;bottom:20px;left:17px;
+  .line.start {
+    position:absolute;
+    top:0; left:50px;
+    width:10px; height:100%;
+    background:pink;
   }
-  .eye {width:8px;height:8px;border-radius:50%;}
-  .lips {
-    width:30px;height:8px;border-radius:4px;position:absolute;bottom:8px;left:20px;
+  .line.end {
+    position:absolute;
+    top:0; right:50px;
+    width:10px; height:100%;
+    background:#333;
   }
-  .torso, .dress, .skirt, .legs {
-    display:block;
+  .checkpoint {
+    position:absolute;
+    width:14px; height:14px;
+    background:yellow;
+    border-radius:50%;
   }
-  .torso {
-    width:60px;height:80px;border-radius:8px 8px 0 0;
+  .brainrot {
+    position:absolute;
+    width:20px; height:20px;
+    background:#ff7bb0;
+    border-radius:50%;
   }
-  .skirt {
-    width:70px;height:50px;border-radius:0 0 10px 10px;margin-top:-8px;
+  .player {
+    position:absolute;
+    width:30px; height:30px;
+    border-radius:50%;
+    top:50%;
+    transform:translateY(-50%);
   }
-  .legs {
-    display:flex;gap:10px;margin-top:-4px;
+  .p1 {background:red;}
+  .p2 {background:green;}
+  .p3 {background:blue;}
+  /* podium */
+  .podium {
+    position:absolute;
+    bottom:100px; left:50%;
+    transform:translateX(-50%);
+    display:flex; align-items:flex-end; gap:20px;
+    display:none;
   }
-  .leg {
-    width:12px;height:80px;border-radius:6px;
+  .podium .spot {
+    width:100px; text-align:center;
+    background:#ddd; border-radius:6px 6px 0 0;
   }
-  /* specific styles */
-  /* center girl */
-  .center .head {
-    background:#f2d1b3;
+  .first {height:150px; background:gold;}
+  .second {height:120px; background:silver;}
+  .third {height:100px; background:#cd7f32;}
+  /* scoreboard */
+  .scoreboard {
+    position:absolute;
+    bottom:0;
+    left:0;
+    width:100%;
+    background:#fff8;
+    display:flex;
+    justify-content:space-around;
+    font-size:20px;
+    font-weight:bold;
+    padding:10px;
   }
-  .center .hair {
-    position:absolute;top:0;left:0;width:100%;height:50%;border-radius:50% 50% 20% 20%;
-    background:linear-gradient(90deg,#6b3f1e,#462712);
-  }
-  .center .eye {background:#1e90ff;}
-  .center .lips {background:linear-gradient(180deg,#ffb3b3,#ff8080);}
-  .center .torso {background:#fff;}
-  .center .skirt {background:#3a6da0;}
-  .center .leg {background:#f2d1b3;}
-  /* side girls */
-  .side .head {
-    background:#f9f5f5;
-  }
-  .side .hair {
-    position:absolute;top:0;left:0;width:100%;height:50%;border-radius:50% 50% 20% 20%;
-    background:linear-gradient(90deg,#d9b700,#f9e57a);
-  }
-  .side .eye {background:brown;}
-  .side .lips {background:#e59999;}
-  .side .dress {
-    width:70px;height:130px;border-radius:10px;background:linear-gradient(180deg,#c9b6d3,#a690b9);
-  }
-  .side .leg {background:#f9f5f5;}
 </style>
 </head>
 <body>
-  <div class="stage">
-    <!-- second place -->
+  <div class="game">
+    <div class="line start"></div>
+    <div class="line end"></div>
+    <!-- checkpoints -->
+    <div class="checkpoint" style="top:20%; left:20%"></div>
+    <div class="checkpoint" style="top:40%; left:35%"></div>
+    <div class="checkpoint" style="top:60%; left:45%"></div>
+    <div class="checkpoint" style="top:30%; left:60%"></div>
+    <div class="checkpoint" style="top:70%; left:70%"></div>
+    <div class="checkpoint" style="top:50%; left:85%"></div>
+
+    <!-- brainrot collectibles -->
+    <div class="brainrot" style="top:25%; left:25%"></div>
+    <div class="brainrot" style="top:55%; left:38%"></div>
+    <div class="brainrot" style="top:35%; left:62%"></div>
+    <div class="brainrot" style="top:75%; left:72%"></div>
+    <div class="brainrot" style="top:45%; left:87%"></div>
+
+    <!-- players -->
+    <div class="player p1"></div>
+    <div class="player p2"></div>
+    <div class="player p3"></div>
+
+    <!-- podium -->
     <div class="podium">
-      <div class="character side">
-        <div class="head">
-          <div class="hair"></div>
-          <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
-          <div class="lips"></div>
-        </div>
-        <div class="dress"></div>
-        <div class="legs"><div class="leg"></div><div class="leg"></div></div>
-      </div>
-      <div class="platform second">2</div>
+      <div class="spot second">2nd</div>
+      <div class="spot first">1st</div>
+      <div class="spot third">3rd</div>
     </div>
-    <!-- first place -->
-    <div class="podium">
-      <div class="character center">
-        <div class="head">
-          <div class="hair"></div>
-          <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
-          <div class="lips"></div>
-        </div>
-        <div class="torso"></div>
-        <div class="skirt"></div>
-        <div class="legs"><div class="leg"></div><div class="leg"></div></div>
-      </div>
-      <div class="platform first">1</div>
-    </div>
-    <!-- third place -->
-    <div class="podium">
-      <div class="character side">
-        <div class="head">
-          <div class="hair"></div>
-          <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
-          <div class="lips"></div>
-        </div>
-        <div class="dress"></div>
-        <div class="legs"><div class="leg"></div><div class="leg"></div></div>
-      </div>
-      <div class="platform third">3</div>
+
+    <!-- scoreboard -->
+    <div class="scoreboard">
+      <div id="score1">Player 1: 0</div>
+      <div id="score2">Player 2: 0</div>
+      <div id="score3">Player 3: 0</div>
     </div>
   </div>
-</body>
-</html>
-.dress {width:80px;height:200px;}   /* much longer dress */
-.leg {width:14px;height:140px;}     /* longer legs */
-.dress {width:80px;height:200px;}   /* much longer dress */
-.leg {width:14px;height:140px;}     /* longer legs */
-.dress {width:80px;height:200px;}   /* much longer dress */
-.leg {width:14px;height:140px;}     /* longer legs */
-.dress {width:80px;height:200px;}   /* much longer dress */
-.leg {width:14px;height:140px;}     /* longer legs */
-.dress {width:80px;height:200px;}   /* much longer dress */
-.leg {width:14px;height:140px;}     /* longer legs */
-.dress {width:80px;height:200px;}   /* much longer dress */
-.leg {width:14px;height:140px;}     /* longer legs */
-html, body {
-  margin:0;
-  height:100%;
-  font-family:sans-serif;
-  background:var(--bg);
-  position:relative;
+
+<script>
+const players = [
+  {el: document.querySelector(".p1"), x:60, y:100, score:0, name:"Player 1", scoreEl:document.getElementById("score1")},
+  {el: document.querySelector(".p2"), x:60, y:200, score:0, name:"Player 2", scoreEl:document.getElementById("score2")},
+  {el: document.querySelector(".p3"), x:60, y:300, score:0, name:"Player 3", scoreEl:document.getElementById("score3")},
+];
+
+const brainrots = [...document.querySelectorAll(".brainrot")];
+let finished = false;
+
+function update() {
+  if(finished) return;
+
+  players.forEach(p=>{
+    p.x += Math.random()*4; // move forward
+    p.y += (Math.random()-0.5)*3; // wiggle
+    p.el.style.left = p.x+"px";
+    p.el.style.top = p.y+"px";
+
+    brainrots.forEach(b=>{
+      if(!b.collected){
+        const bx = b.offsetLeft, by = b.offsetTop;
+        if(Math.abs(p.x-bx)<20 && Math.abs(p.y-by)<20){
+          b.style.display="none";
+          b.collected = true;
+          p.score++;
+          p.scoreEl.textContent = p.name+": "+p.score;
+        }
+      }
+    });
+
+    if(p.x > window.innerWidth-100){
+      endGame();
+    }
+  });
+
+  requestAnimationFrame(update);
 }
 
-/* overlay of 67s everywhere */
-body::before {
-  content:"67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67";
-  position:fixed;
-  inset:0;
-  font-size:60px;
-  line-height:60px;
-  color:#ff69b4; /* bright pink */
-  opacity:0.15;  /* adjust so it’s not overpowering */
-  white-space:pre-wrap;
-  word-wrap:break-word;
-  z-index:-1;
+function endGame(){
+  finished = true;
+  const podium = document.querySelector(".podium");
+  podium.style.display="flex";
+
+  players.sort((a,b)=>b.score-a.score);
+
+  podium.querySelector(".first").textContent = "1st "+players[0].name+" ("+players[0].score+")";
+  podium.querySelector(".second").textContent = "2nd "+players[1].name+" ("+players[1].score+")";
+  podium.querySelector(".third").textContent = "3rd "+players[2].name+" ("+players[2].score+")";
 }
+
+update();
+</script>
+</body>
+</html>
