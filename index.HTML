@@ -27,6 +27,20 @@
       z-index: -1;
     }
 
+    /* neon pink title */
+    #title {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 42px;
+      font-weight: bold;
+      color: #ff4fd8;
+      text-shadow: 0 0 6px #ff4fd8, 0 0 12px #ff4fd8, 0 0 24px #ff1cd2;
+      z-index: 20;
+      pointer-events: none;
+    }
+
     #menu, #end {
       position: absolute;
       inset: 0;
@@ -76,6 +90,10 @@
   </style>
 </head>
 <body>
+  <!-- Title -->
+  <div id="title">STEAL A RILEY</div>
+
+  <!-- Menu -->
   <div id="menu">
     <h1>Choose Your Player</h1>
     <button class="player-btn p1" onclick="startGame(1)">Player 1</button>
@@ -83,6 +101,7 @@
     <button class="player-btn p3" onclick="startGame(3)">Player 3</button>
   </div>
 
+  <!-- End screen -->
   <div id="end">
     <h1>🎉 YOU WIN! 🎉</h1>
     <p>You collected 10 brainrots!</p>
