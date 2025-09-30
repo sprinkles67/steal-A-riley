@@ -1,191 +1,190 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Brain Rot Race</title>
-<style>
-  body {
-    margin:0;
-    font-family:sans-serif;
-    height:100vh;
-    background:linear-gradient(135deg, #ffb6e6 50%, #87cefa 50%);
-    overflow:hidden;
-    position:relative;
-  }
-  /* repeating 67 background */
-  body::before {
-    content:"67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67";
-    position:absolute;
-    inset:0;
-    font-size:60px;
-    line-height:60px;
-    color:#ff69b4;
-    opacity:0.15;
-    white-space:pre-wrap;
-    word-wrap:break-word;
-    z-index:0;
-  }
-  .game {
-    position:relative;
-    width:100%;
-    height:100%;
-    z-index:1;
-  }
-  .line.start {
-    position:absolute;
-    top:0; left:50px;
-    width:10px; height:100%;
-    background:pink;
-  }
-  .line.end {
-    position:absolute;
-    top:0; right:50px;
-    width:10px; height:100%;
-    background:#333;
-  }
-  .checkpoint {
-    position:absolute;
-    width:14px; height:14px;
-    background:yellow;
-    border-radius:50%;
-  }
-  .brainrot {
-    position:absolute;
-    width:20px; height:20px;
-    background:#ff7bb0;
-    border-radius:50%;
-  }
-  .player {
-    position:absolute;
-    width:30px; height:30px;
-    border-radius:50%;
-    top:50%;
-    transform:translateY(-50%);
-  }
-  .p1 {background:red;}
-  .p2 {background:green;}
-  .p3 {background:blue;}
-  /* podium */
-  .podium {
-    position:absolute;
-    bottom:100px; left:50%;
-    transform:translateX(-50%);
-    display:flex; align-items:flex-end; gap:20px;
-    display:none;
-  }
-  .podium .spot {
-    width:100px; text-align:center;
-    background:#ddd; border-radius:6px 6px 0 0;
-  }
-  .first {height:150px; background:gold;}
-  .second {height:120px; background:silver;}
-  .third {height:100px; background:#cd7f32;}
-  /* scoreboard */
-  .scoreboard {
-    position:absolute;
-    bottom:0;
-    left:0;
-    width:100%;
-    background:#fff8;
-    display:flex;
-    justify-content:space-around;
-    font-size:20px;
-    font-weight:bold;
-    padding:10px;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <title>Brainrot Racer</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #ffb6e6, #7ec8ff);
+    }
+
+    /* repeating 67 background */
+    body::before {
+      content: "67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67";
+      position: fixed;
+      inset: 0;
+      font-size: 60px;
+      line-height: 60px;
+      color: #ff69b4;
+      opacity: 0.2;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      z-index: -1;
+    }
+
+    #menu {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    #menu h1 { margin-bottom: 20px; }
+    .player-btn {
+      padding: 12px 24px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .player-btn:hover { transform: scale(1.1); }
+
+    .p1 { background:#ffdf5d; }
+    .p2 { background:#ff7bb0; }
+    .p3 { background:#7ec8ff; }
+
+    canvas {
+      display: block;
+    }
+
+    #score {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-  <div class="game">
-    <div class="line start"></div>
-    <div class="line end"></div>
-    <!-- checkpoints -->
-    <div class="checkpoint" style="top:20%; left:20%"></div>
-    <div class="checkpoint" style="top:40%; left:35%"></div>
-    <div class="checkpoint" style="top:60%; left:45%"></div>
-    <div class="checkpoint" style="top:30%; left:60%"></div>
-    <div class="checkpoint" style="top:70%; left:70%"></div>
-    <div class="checkpoint" style="top:50%; left:85%"></div>
-
-    <!-- brainrot collectibles -->
-    <div class="brainrot" style="top:25%; left:25%"></div>
-    <div class="brainrot" style="top:55%; left:38%"></div>
-    <div class="brainrot" style="top:35%; left:62%"></div>
-    <div class="brainrot" style="top:75%; left:72%"></div>
-    <div class="brainrot" style="top:45%; left:87%"></div>
-
-    <!-- players -->
-    <div class="player p1"></div>
-    <div class="player p2"></div>
-    <div class="player p3"></div>
-
-    <!-- podium -->
-    <div class="podium">
-      <div class="spot second">2nd</div>
-      <div class="spot first">1st</div>
-      <div class="spot third">3rd</div>
-    </div>
-
-    <!-- scoreboard -->
-    <div class="scoreboard">
-      <div id="score1">Player 1: 0</div>
-      <div id="score2">Player 2: 0</div>
-      <div id="score3">Player 3: 0</div>
-    </div>
+  <div id="menu">
+    <h1>Choose Your Player</h1>
+    <button class="player-btn p1" onclick="startGame(1)">Player 1</button>
+    <button class="player-btn p2" onclick="startGame(2)">Player 2</button>
+    <button class="player-btn p3" onclick="startGame(3)">Player 3</button>
   </div>
 
-<script>
-const players = [
-  {el: document.querySelector(".p1"), x:60, y:100, score:0, name:"Player 1", scoreEl:document.getElementById("score1")},
-  {el: document.querySelector(".p2"), x:60, y:200, score:0, name:"Player 2", scoreEl:document.getElementById("score2")},
-  {el: document.querySelector(".p3"), x:60, y:300, score:0, name:"Player 3", scoreEl:document.getElementById("score3")},
-];
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <div id="score">Score: 0</div>
 
-const brainrots = [...document.querySelectorAll(".brainrot")];
-let finished = false;
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    let player, keys={}, brainrots=[], checkpoints=[], score=0;
 
-function update() {
-  if(finished) return;
+    function startGame(pNum){
+      document.getElementById("menu").style.display="none";
+      init(pNum);
+      requestAnimationFrame(gameLoop);
+    }
 
-  players.forEach(p=>{
-    p.x += Math.random()*4; // move forward
-    p.y += (Math.random()-0.5)*3; // wiggle
-    p.el.style.left = p.x+"px";
-    p.el.style.top = p.y+"px";
+    function init(pNum){
+      // player colors
+      let colors = {1:"#ffdf5d",2:"#ff7bb0",3:"#7ec8ff"};
+      player = {x:100,y:100,w:30,h:50,color:colors[pNum],speed:4};
 
-    brainrots.forEach(b=>{
-      if(!b.collected){
-        const bx = b.offsetLeft, by = b.offsetTop;
-        if(Math.abs(p.x-bx)<20 && Math.abs(p.y-by)<20){
-          b.style.display="none";
-          b.collected = true;
-          p.score++;
-          p.scoreEl.textContent = p.name+": "+p.score;
+      // make checkpoints
+      checkpoints=[];
+      for(let i=0;i<6;i++){
+        checkpoints.push({
+          x:Math.random()*700+50,
+          y:Math.random()*500+50,
+          r:40
+        });
+      }
+
+      // make brainrots
+      brainrots=[];
+      for(let i=0;i<10;i++){
+        brainrots.push({
+          x:Math.random()*760+20,
+          y:Math.random()*560+20,
+          r:15,
+          dx:(Math.random()*2-1),
+          dy:(Math.random()*2-1)
+        });
+      }
+
+      // keys
+      window.addEventListener("keydown",e=>keys[e.key]=true);
+      window.addEventListener("keyup",e=>keys[e.key]=false);
+    }
+
+    function update(){
+      if(keys["ArrowUp"]||keys["w"]) player.y-=player.speed;
+      if(keys["ArrowDown"]||keys["s"]) player.y+=player.speed;
+      if(keys["ArrowLeft"]||keys["a"]) player.x-=player.speed;
+      if(keys["ArrowRight"]||keys["d"]) player.x+=player.speed;
+
+      // keep in bounds
+      player.x=Math.max(0,Math.min(canvas.width-player.w,player.x));
+      player.y=Math.max(0,Math.min(canvas.height-player.h,player.y));
+
+      // move brainrots
+      for(let b of brainrots){
+        b.x+=b.dx; b.y+=b.dy;
+        if(b.x<0||b.x>canvas.width) b.dx*=-1;
+        if(b.y<0||b.y>canvas.height) b.dy*=-1;
+      }
+
+      // check collisions
+      for(let i=brainrots.length-1;i>=0;i--){
+        let b=brainrots[i];
+        if(Math.abs(player.x+player.w/2-b.x)<player.w/2+b.r &&
+           Math.abs(player.y+player.h/2-b.y)<player.h/2+b.r){
+          brainrots.splice(i,1);
+          score++;
+          document.getElementById("score").textContent="Score: "+score;
         }
       }
-    });
-
-    if(p.x > window.innerWidth-100){
-      endGame();
     }
-  });
 
-  requestAnimationFrame(update);
-}
+    function draw(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
 
-function endGame(){
-  finished = true;
-  const podium = document.querySelector(".podium");
-  podium.style.display="flex";
+      // draw checkpoints
+      ctx.fillStyle="pink";
+      for(let c of checkpoints){
+        ctx.beginPath();
+        ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
+        ctx.fill();
+      }
 
-  players.sort((a,b)=>b.score-a.score);
+      // draw player
+      ctx.fillStyle=player.color;
+      ctx.fillRect(player.x,player.y,player.w,player.h);
 
-  podium.querySelector(".first").textContent = "1st "+players[0].name+" ("+players[0].score+")";
-  podium.querySelector(".second").textContent = "2nd "+players[1].name+" ("+players[1].score+")";
-  podium.querySelector(".third").textContent = "3rd "+players[2].name+" ("+players[2].score+")";
-}
+      // draw brainrots
+      for(let b of brainrots){
+        // body
+        ctx.fillStyle="blue";
+        ctx.beginPath();
+        ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+        ctx.fill();
+        // hair
+        ctx.fillStyle="pink";
+        ctx.fillRect(b.x-b.r,b.y-b.r-10,b.r*2,10);
+      }
+    }
 
-update();
-</script>
+    function gameLoop(){
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+  </script>
 </body>
 </html>
