@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Brainrot Clicker Game</title>
+  <title>Brainrot Collector</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
       font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #ffb6e6, #7ec8ff);
-      touch-action: none; /* prevent scrolling while tapping */
+      touch-action: none;
     }
 
     /* repeating 67 background */
@@ -27,10 +27,10 @@
       z-index: -1;
     }
 
-    #menu {
+    #menu, #end {
       position: absolute;
       inset: 0;
-      background: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.85);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -38,7 +38,8 @@
       z-index: 10;
     }
 
-    #menu h1 { margin-bottom: 20px; text-align:center; }
+    #menu h1, #end h1 { margin-bottom: 20px; text-align: center; }
+
     .player-btn {
       padding: 14px 28px;
       margin: 12px;
@@ -51,6 +52,9 @@
     .p1 { background:#ffdf5d; }
     .p2 { background:#ff7bb0; }
     .p3 { background:#7ec8ff; }
+
+    #end { display: none; }
+    #end h1 { font-size: 36px; color: #ff69b4; }
 
     canvas {
       display: block;
@@ -79,13 +83,19 @@
     <button class="player-btn p3" onclick="startGame(3)">Player 3</button>
   </div>
 
+  <div id="end">
+    <h1>🎉 YOU WIN! 🎉</h1>
+    <p>You collected 10 brainrots!</p>
+    <button onclick="location.reload()">Play Again</button>
+  </div>
+
   <canvas id="gameCanvas"></canvas>
   <div id="score">Score: 0</div>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    let brainrots = [], score = 0;
+    let brainrots = [], score = 0, player, gameOver = false;
 
     function resizeCanvas(){
       canvas.width = window.innerWidth;
@@ -101,18 +111,21 @@
     }
 
     function init(){
+      score=0;
+      gameOver=false;
       brainrots=[];
-      for(let i=0;i<20;i++){
+      for(let i=0;i<15;i++){
         brainrots.push({
-          x:Math.random()*(canvas.width-40)+20,
-          y:Math.random()*(canvas.height-40)+20,
+          x:Math.random()*(canvas.width-60)+30,
+          y:Math.random()*(canvas.height-60)+30,
           r:25,
-          dx:(Math.random()*2-1)*1.5,
-          dy:(Math.random()*2-1)*1.5
+          dx:(Math.random()*2-1)*1.2,
+          dy:(Math.random()*2-1)*1.2
         });
       }
 
-      // clicks + taps
+      player={x:canvas.width/2,y:canvas.height/2,size:30};
+
       canvas.addEventListener("click", handleClick);
       canvas.addEventListener("touchstart", function(e){
         let touch = e.touches[0];
@@ -121,18 +134,23 @@
     }
 
     function handleClick(e){
+      if(gameOver) return;
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
       const my = e.clientY - rect.top;
 
+      // check if clicked brainrot
       for(let i=brainrots.length-1;i>=0;i--){
         let b=brainrots[i];
         let dist=Math.hypot(mx-b.x,my-b.y);
         if(dist<b.r){
           brainrots.splice(i,1);
           score++;
+          player.x = b.x; // move player to clicked spot
+          player.y = b.y;
           document.getElementById("score").textContent="Score: "+score;
-          break;
+          if(score>=10) endGame();
+          return;
         }
       }
     }
@@ -157,12 +175,25 @@
         ctx.fillStyle="pink";
         ctx.fillRect(b.x-b.r, b.y-b.r-12, b.r*2, 12);
       }
+
+      // draw player
+      ctx.fillStyle="gold";
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.size, 0, Math.PI*2);
+      ctx.fill();
     }
 
     function gameLoop(){
-      update();
-      draw();
-      requestAnimationFrame(gameLoop);
+      if(!gameOver){
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    function endGame(){
+      gameOver=true;
+      document.getElementById("end").style.display="flex";
     }
   </script>
 </body>
