@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Brainrot Racer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Brainrot Clicker Game</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
       font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #ffb6e6, #7ec8ff);
+      touch-action: none; /* prevent scrolling while tapping */
     }
 
     /* repeating 67 background */
@@ -36,17 +38,15 @@
       z-index: 10;
     }
 
-    #menu h1 { margin-bottom: 20px; }
+    #menu h1 { margin-bottom: 20px; text-align:center; }
     .player-btn {
-      padding: 12px 24px;
-      margin: 10px;
+      padding: 14px 28px;
+      margin: 12px;
       border: none;
-      border-radius: 8px;
-      font-size: 18px;
+      border-radius: 10px;
+      font-size: 20px;
       cursor: pointer;
-      transition: transform 0.2s;
     }
-    .player-btn:hover { transform: scale(1.1); }
 
     .p1 { background:#ffdf5d; }
     .p2 { background:#ff7bb0; }
@@ -54,6 +54,8 @@
 
     canvas {
       display: block;
+      width: 100vw;
+      height: 100vh;
     }
 
     #score {
@@ -64,7 +66,7 @@
       background: white;
       padding: 10px 20px;
       border-radius: 8px;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: bold;
     }
   </style>
@@ -77,106 +79,83 @@
     <button class="player-btn p3" onclick="startGame(3)">Player 3</button>
   </div>
 
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <canvas id="gameCanvas"></canvas>
   <div id="score">Score: 0</div>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    let player, keys={}, brainrots=[], checkpoints=[], score=0;
+    let brainrots = [], score = 0;
+
+    function resizeCanvas(){
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
 
     function startGame(pNum){
       document.getElementById("menu").style.display="none";
-      init(pNum);
+      init();
       requestAnimationFrame(gameLoop);
     }
 
-    function init(pNum){
-      // player colors
-      let colors = {1:"#ffdf5d",2:"#ff7bb0",3:"#7ec8ff"};
-      player = {x:100,y:100,w:30,h:50,color:colors[pNum],speed:4};
-
-      // make checkpoints
-      checkpoints=[];
-      for(let i=0;i<6;i++){
-        checkpoints.push({
-          x:Math.random()*700+50,
-          y:Math.random()*500+50,
-          r:40
-        });
-      }
-
-      // make brainrots
+    function init(){
       brainrots=[];
-      for(let i=0;i<10;i++){
+      for(let i=0;i<20;i++){
         brainrots.push({
-          x:Math.random()*760+20,
-          y:Math.random()*560+20,
-          r:15,
-          dx:(Math.random()*2-1),
-          dy:(Math.random()*2-1)
+          x:Math.random()*(canvas.width-40)+20,
+          y:Math.random()*(canvas.height-40)+20,
+          r:25,
+          dx:(Math.random()*2-1)*1.5,
+          dy:(Math.random()*2-1)*1.5
         });
       }
 
-      // keys
-      window.addEventListener("keydown",e=>keys[e.key]=true);
-      window.addEventListener("keyup",e=>keys[e.key]=false);
+      // clicks + taps
+      canvas.addEventListener("click", handleClick);
+      canvas.addEventListener("touchstart", function(e){
+        let touch = e.touches[0];
+        handleClick({clientX:touch.clientX, clientY:touch.clientY});
+      });
     }
 
-    function update(){
-      if(keys["ArrowUp"]||keys["w"]) player.y-=player.speed;
-      if(keys["ArrowDown"]||keys["s"]) player.y+=player.speed;
-      if(keys["ArrowLeft"]||keys["a"]) player.x-=player.speed;
-      if(keys["ArrowRight"]||keys["d"]) player.x+=player.speed;
+    function handleClick(e){
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
 
-      // keep in bounds
-      player.x=Math.max(0,Math.min(canvas.width-player.w,player.x));
-      player.y=Math.max(0,Math.min(canvas.height-player.h,player.y));
-
-      // move brainrots
-      for(let b of brainrots){
-        b.x+=b.dx; b.y+=b.dy;
-        if(b.x<0||b.x>canvas.width) b.dx*=-1;
-        if(b.y<0||b.y>canvas.height) b.dy*=-1;
-      }
-
-      // check collisions
       for(let i=brainrots.length-1;i>=0;i--){
         let b=brainrots[i];
-        if(Math.abs(player.x+player.w/2-b.x)<player.w/2+b.r &&
-           Math.abs(player.y+player.h/2-b.y)<player.h/2+b.r){
+        let dist=Math.hypot(mx-b.x,my-b.y);
+        if(dist<b.r){
           brainrots.splice(i,1);
           score++;
           document.getElementById("score").textContent="Score: "+score;
+          break;
         }
+      }
+    }
+
+    function update(){
+      for(let b of brainrots){
+        b.x+=b.dx; b.y+=b.dy;
+        if(b.x<b.r||b.x>canvas.width-b.r) b.dx*=-1;
+        if(b.y<b.r||b.y>canvas.height-b.r) b.dy*=-1;
       }
     }
 
     function draw(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
 
-      // draw checkpoints
-      ctx.fillStyle="pink";
-      for(let c of checkpoints){
-        ctx.beginPath();
-        ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
-        ctx.fill();
-      }
-
-      // draw player
-      ctx.fillStyle=player.color;
-      ctx.fillRect(player.x,player.y,player.w,player.h);
-
       // draw brainrots
       for(let b of brainrots){
-        // body
         ctx.fillStyle="blue";
         ctx.beginPath();
         ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
         ctx.fill();
-        // hair
         ctx.fillStyle="pink";
-        ctx.fillRect(b.x-b.r,b.y-b.r-10,b.r*2,10);
+        ctx.fillRect(b.x-b.r, b.y-b.r-12, b.r*2, 12);
       }
     }
 
