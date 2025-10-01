@@ -83,6 +83,9 @@
     let brainrots = [];
     let players = [];
     let feedbacks = [];
+    let mouseX = 500;
+    let mouseY = 300;
+    let spawnInterval;
 
     class Player {
       constructor(name, isBot=false, color="white") {
@@ -90,6 +93,8 @@
         this.isBot = isBot;
         this.score = 0;
         this.color = color;
+        this.x = 500;
+        this.y = 300;
       }
       updateBot() {
         if (!this.isBot || brainrots.length === 0) return;
@@ -102,6 +107,54 @@
           showClickFeedback(br.x, br.y, br.fake ? '-1' : '+1');
           brainrots.splice(i, 1);
           checkWin(this);
+        }
+      }
+      drawCharacter() {
+        // Player 1 follows mouse
+        if (!this.isBot) {
+          this.x = mouseX;
+          this.y = mouseY;
+        }
+
+        // Body
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x - 10, this.y, 20, 40);
+
+        // Head
+        ctx.beginPath();
+        ctx.arc(this.x, this.y - 20, 20, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+
+        // Facial features for player 1
+        if (!this.isBot) {
+          // Eyes
+          ctx.fillStyle = "white";
+          ctx.beginPath();
+          ctx.arc(this.x - 7, this.y - 22, 5, 0, Math.PI * 2);
+          ctx.arc(this.x + 7, this.y - 22, 5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Pupils
+          ctx.fillStyle = "black";
+          ctx.beginPath();
+          ctx.arc(this.x - 7, this.y - 22, 2, 0, Math.PI * 2);
+          ctx.arc(this.x + 7, this.y - 22, 2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Mouth
+          ctx.strokeStyle = "black";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y - 15, 7, 0, Math.PI);
+          ctx.stroke();
+
+          // Hair
+          ctx.fillStyle = "yellow";
+          ctx.beginPath();
+          ctx.moveTo(this.x - 20, this.y - 35);
+          ctx.quadraticCurveTo(this.x, this.y - 50, this.x + 20, this.y - 35);
+          ctx.fill();
         }
       }
     }
@@ -133,15 +186,21 @@
       }
     }
 
+    canvas.addEventListener("mousemove", e => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+    });
+
     canvas.addEventListener("click", (e) => {
       if (!gameRunning) return;
       const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
+      const mouseXClick = e.clientX - rect.left;
+      const mouseYClick = e.clientY - rect.top;
 
       for (let i = brainrots.length - 1; i >= 0; i--) {
         const br = brainrots[i];
-        const dist = Math.hypot(mouseX - br.x, mouseY - br.y);
+        const dist = Math.hypot(mouseXClick - br.x, mouseYClick - br.y);
         if (dist < br.size) {
           let me = players[0];
           if (br.fake) me.score = Math.max(0, me.score - 1);
@@ -207,7 +266,10 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       brainrots.forEach(br => br.update());
-      players.forEach(p => p.updateBot());
+      players.forEach(p => {
+        if (!p.isBot) p.drawCharacter(); // draw player 1
+        else p.updateBot(); // bots
+      });
       updateScoreboard();
 
       // draw feedbacks
@@ -257,14 +319,50 @@
       if (ranking[0]) ctx.fillText(`${ranking[0].name} (${ranking[0].score})`, canvas.width/2 - 40, baseY - 160);
       if (ranking[2]) ctx.fillText(`${ranking[2].name} (${ranking[2].score})`, canvas.width/2 + podiumWidth/2 + 10, baseY - 90);
 
-      // draw player heads
-      ranking.forEach((p,i) => {
-        let x = canvas.width/2 + (i-1)*200;
+      // draw podium characters
+      ranking.forEach((p, i) => {
+        let x = canvas.width/2 + (i - 1) * 200;
         let y = baseY - ((i===0)?150:(i===1?100:80)) - 30;
+
+        // body
         ctx.fillStyle = p.color;
+        ctx.fillRect(x + podiumWidth/2 - 10, y, 20, 40);
+
+        // head
         ctx.beginPath();
-        ctx.arc(x + podiumWidth/2, y, 30, 0, Math.PI*2);
+        ctx.arc(x + podiumWidth/2, y - 20, 20, 0, Math.PI*2);
+        ctx.fillStyle = p.color;
         ctx.fill();
+
+        // Player 1 face
+        if (p.name === "You") {
+          // eyes
+          ctx.fillStyle = "white";
+          ctx.beginPath();
+          ctx.arc(x + podiumWidth/2 - 7, y - 22, 5, 0, Math.PI*2);
+          ctx.arc(x + podiumWidth/2 + 7, y - 22, 5, 0, Math.PI*2);
+          ctx.fill();
+
+          ctx.fillStyle = "black";
+          ctx.beginPath();
+          ctx.arc(x + podiumWidth/2 - 7, y - 22, 2, 0, Math.PI*2);
+          ctx.arc(x + podiumWidth/2 + 7, y - 22, 2, 0, Math.PI*2);
+          ctx.fill();
+
+          // mouth
+          ctx.strokeStyle = "black";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(x + podiumWidth/2, y - 15, 7, 0, Math.PI);
+          ctx.stroke();
+
+          // hair
+          ctx.fillStyle = "yellow";
+          ctx.beginPath();
+          ctx.moveTo(x + podiumWidth/2 - 20, y - 35);
+          ctx.quadraticCurveTo(x + podiumWidth/2, y - 50, x + podiumWidth/2 + 20, y - 35);
+          ctx.fill();
+        }
       });
 
       playAgainBtn.style.display = "block";
