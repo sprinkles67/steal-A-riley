@@ -246,3 +246,347 @@
   </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Brainrot Collector</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #ffb6e6, #7ec8ff);
+      touch-action: none;
+    }
+
+    body::before {
+      content: "67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67";
+      position: fixed;
+      inset: 0;
+      font-size: 60px;
+      line-height: 60px;
+      color: #ff69b4;
+      opacity: 0.2;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      z-index: -1;
+    }
+
+    #title {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 48px;
+      font-weight: bold;
+      color: #ff4fd8;
+      text-shadow: 0 0 6px #ff4fd8, 0 0 12px #ff4fd8, 0 0 24px #ff1cd2;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    #end {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      display: none;
+    }
+
+    #end h1 { font-size: 36px; color: #ff69b4; margin-bottom: 20px; }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #score {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 20px;
+      border: none;
+      border-radius: 8px;
+      background: #ff69b4;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 12px #ff69b4;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #ff4fd8;
+    }
+  </style>
+</head>
+<body>
+  <div id="title">STEAL A RILEY</div>
+
+  <div id="end">
+    <h1 id="winnerText"></h1>
+    <canvas id="podiumCanvas"></canvas>
+    <button onclick="location.reload()">🔄 Play Again</button>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+  <div id="score">Score: 0</div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    let brainrots = [], players = [], gameOver = false;
+
+    // Confetti system
+    let confetti = [];
+
+    function spawnConfettiExplosion(x, y) {
+      for (let i = 0; i < 40; i++) {
+        confetti.push({
+          x, y,
+          dx: (Math.random() - 0.5) * 6,
+          dy: (Math.random() - 0.5) * 6,
+          size: Math.random() * 6 + 4,
+          color: `hsl(${Math.random()*360},100%,50%)`,
+          life: 100
+        });
+      }
+    }
+
+    function spawnFallingConfetti() {
+      for (let i = 0; i < 15; i++) {
+        confetti.push({
+          x: Math.random() * canvas.width,
+          y: -20,
+          dx: (Math.random()-0.5)*2,
+          dy: Math.random()*3+2,
+          size: Math.random()*6+4,
+          color: `hsl(${Math.random()*360},100%,50%)`,
+          life: 200
+        });
+      }
+    }
+
+    function drawConfetti() {
+      for (let i = confetti.length-1; i >= 0; i--) {
+        let c = confetti[i];
+        c.x += c.dx;
+        c.y += c.dy;
+        c.dy += 0.05; // gravity
+        c.life--;
+        ctx.fillStyle = c.color;
+        ctx.fillRect(c.x, c.y, c.size, c.size);
+        if (c.life <= 0 || c.y > canvas.height) confetti.splice(i,1);
+      }
+    }
+
+    function resizeCanvas(){
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function init(){
+      brainrots=[];
+      for(let i=0;i<20;i++){
+        brainrots.push({
+          x:Math.random()*(canvas.width-60)+30,
+          y:Math.random()*(canvas.height-60)+30,
+          r:25,
+          dx:(Math.random()*2-1)*1.2,
+          dy:(Math.random()*2-1)*1.2
+        });
+      }
+
+      players = [
+        {id:1, x:canvas.width/2, y:canvas.height/2, size:30, color:"gold", score:0, isBot:false},
+        {id:2, x:100, y:100, size:30, color:"red", score:0, isBot:true},
+        {id:3, x:canvas.width-100, y:150, size:30, color:"green", score:0, isBot:true}
+      ];
+
+      canvas.addEventListener("click", handleClick);
+      canvas.addEventListener("touchstart", function(e){
+        let touch = e.touches[0];
+        handleClick({clientX:touch.clientX, clientY:touch.clientY});
+      });
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    function handleClick(e){
+      if(gameOver) return;
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      for(let i=brainrots.length-1;i>=0;i--){
+        let b=brainrots[i];
+        let dist=Math.hypot(mx-b.x,my-b.y);
+        if(dist<b.r){
+          brainrots.splice(i,1);
+          let p=players[0];
+          p.score++;
+          p.x = b.x; p.y = b.y;
+          document.getElementById("score").textContent="Score: "+p.score;
+          if(p.score>=10) endGame(p);
+          return;
+        }
+      }
+    }
+
+    function update(){
+      for(let b of brainrots){
+        b.x+=b.dx; b.y+=b.dy;
+        if(b.x<b.r||b.x>canvas.width-b.r) b.dx*=-1;
+        if(b.y<b.r||b.y>canvas.height-b.r) b.dy*=-1;
+      }
+
+      for(let p of players){
+        if(!p.isBot||gameOver) continue;
+        if(brainrots.length>0){
+          let target=brainrots[0];
+          let dx=target.x-p.x;
+          let dy=target.y-p.y;
+          let dist=Math.hypot(dx,dy);
+          if(dist<target.r+20){
+            brainrots.shift();
+            p.score++;
+            if(p.score>=10) endGame(p);
+          } else {
+            p.x+=dx/dist*1.5;
+            p.y+=dy/dist*1.5;
+          }
+        }
+      }
+    }
+
+    function draw(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+
+      for(let b of brainrots){
+        ctx.fillStyle="blue";
+        ctx.beginPath();
+        ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle="pink";
+        ctx.fillRect(b.x-b.r, b.y-b.r-12, b.r*2, 12);
+      }
+
+      for(let p of players){
+        ctx.fillStyle=p.color;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+        ctx.fill();
+      }
+
+      drawConfetti();
+    }
+
+    function gameLoop(){
+      if(!gameOver){
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    function endGame(winner){
+      gameOver=true;
+      document.getElementById("end").style.display="flex";
+
+      // Podium
+      const podiumCanvas=document.getElementById("podiumCanvas");
+      const pctx=podiumCanvas.getContext("2d");
+      podiumCanvas.width=400;
+      podiumCanvas.height=300;
+      let sorted=[...players].sort((a,b)=>b.score-a.score);
+
+      const podiums=[
+        {x:150, y:260, h:120, color:"gold", num:1},
+        {x:50, y:260, h:80, color:"silver", num:2},
+        {x:250, y:260, h:60, color:"#cd7f32", num:3}
+      ];
+
+      podiums.forEach((p,i)=>{
+        pctx.fillStyle=p.color;
+        pctx.fillRect(p.x, p.y-p.h, 80, p.h);
+        pctx.fillStyle="black";
+        pctx.font="28px Arial Black";
+        pctx.textAlign="center";
+        pctx.fillText(p.num, p.x+40, p.y-10);
+      });
+
+      sorted.forEach((pl,i)=>{
+        let podium=podiums[i];
+        pctx.fillStyle=pl.color;
+        pctx.beginPath();
+        pctx.arc(podium.x+40, podium.y-podium.h-30, 30, 0, Math.PI*2);
+        pctx.fill();
+
+        if(i===0){
+          pctx.fillStyle="black";
+          pctx.beginPath();
+          pctx.arc(podium.x+30, podium.y-podium.h-35, 5, 0, Math.PI*2);
+          pctx.arc(podium.x+50, podium.y-podium.h-35, 5, 0, Math.PI*2);
+          pctx.fill();
+          pctx.beginPath();
+          pctx.arc(podium.x+40, podium.y-podium.h-20, 12, 0, Math.PI, false);
+          pctx.stroke();
+        } else {
+          pctx.fillStyle="black";
+          pctx.beginPath();
+          pctx.arc(podium.x+30, podium.y-podium.h-35, 5, 0, Math.PI*2);
+          pctx.arc(podium.x+50, podium.y-podium.h-35, 5, 0, Math.PI*2);
+          pctx.fill();
+          pctx.fillStyle="blue";
+          pctx.beginPath();
+          pctx.arc(podium.x+30, podium.y-podium.h-25, 4, 0, Math.PI*2);
+          pctx.arc(podium.x+50, podium.y-podium.h-25, 4, 0, Math.PI*2);
+          pctx.fill();
+          pctx.strokeStyle="black";
+          pctx.beginPath();
+          pctx.arc(podium.x+40, podium.y-podium.h-15, 10, Math.PI, 0, true);
+          pctx.stroke();
+        }
+      });
+
+      if(winner.id===1){
+        document.getElementById("winnerText").textContent="🎉 YOU WIN! 🎉";
+
+        // spawn fireworks + falling confetti
+        spawnConfettiExplosion(canvas.width/2, canvas.height/2);
+        let fallInterval = setInterval(spawnFallingConfetti, 200);
+        setTimeout(()=>clearInterval(fallInterval), 4000);
+
+        function confettiLoop(){
+          drawConfetti();
+          if(confetti.length>0) requestAnimationFrame(confettiLoop);
+        }
+        confettiLoop();
+
+      } else {
+        document.getElementById("winnerText").textContent="😢 Bot Player "+winner.id+" Wins!";
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
+
