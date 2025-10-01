@@ -82,6 +82,7 @@
     let targetScore = 10;
     let brainrots = [];
     let players = [];
+    let feedbacks = [];
 
     class Player {
       constructor(name, isBot=false, color="white") {
@@ -92,14 +93,13 @@
       }
       updateBot() {
         if (!this.isBot || brainrots.length === 0) return;
-        if (Math.random() < (difficulty === "hard" ? 0.05 : 0.02)) {
+        let chance = (difficulty === "hard" ? 0.05 : 0.02) + this.score / targetScore * 0.1;
+        if (Math.random() < chance) {
           let i = Math.floor(Math.random() * brainrots.length);
           let br = brainrots[i];
-          if (br.fake) {
-            this.score = Math.max(0, this.score - 1);
-          } else {
-            this.score++;
-          }
+          if (br.fake) this.score = Math.max(0, this.score - 1);
+          else this.score++;
+          showClickFeedback(br.x, br.y, br.fake ? '-1' : '+1');
           brainrots.splice(i, 1);
           checkWin(this);
         }
@@ -144,16 +144,18 @@
         const dist = Math.hypot(mouseX - br.x, mouseY - br.y);
         if (dist < br.size) {
           let me = players[0];
-          if (br.fake) {
-            me.score = Math.max(0, me.score - 1);
-          } else {
-            me.score++;
-          }
+          if (br.fake) me.score = Math.max(0, me.score - 1);
+          else me.score++;
+          showClickFeedback(br.x, br.y, br.fake ? '-1' : '+1');
           brainrots.splice(i, 1);
           checkWin(me);
         }
       }
     });
+
+    function showClickFeedback(x, y, text) {
+      feedbacks.push({x, y, text, alpha: 1});
+    }
 
     function startGame(mode) {
       difficulty = mode;
@@ -184,14 +186,41 @@
       gameRunning = true;
       updateScoreboard();
       animate();
+
+      // continuous spawn
+      if (mode === "hard") {
+        spawnInterval = setInterval(() => {
+          if (!gameRunning) return;
+          if (brainrots.length < 25) {
+            brainrots.push(new Brainrot(
+              Math.random() * canvas.width,
+              Math.random() * canvas.height,
+              Math.random() < 0.3
+            ));
+          }
+        }, 1000);
+      }
     }
 
     function animate() {
       if (!gameRunning) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       brainrots.forEach(br => br.update());
       players.forEach(p => p.updateBot());
       updateScoreboard();
+
+      // draw feedbacks
+      for (let i = feedbacks.length - 1; i >= 0; i--) {
+        const f = feedbacks[i];
+        ctx.fillStyle = `rgba(255,255,255,${f.alpha})`;
+        ctx.font = "20px Arial";
+        ctx.fillText(f.text, f.x, f.y);
+        f.y -= 1;
+        f.alpha -= 0.02;
+        if (f.alpha <= 0) feedbacks.splice(i, 1);
+      }
+
       requestAnimationFrame(animate);
     }
 
@@ -207,35 +236,36 @@
 
     function endGame() {
       gameRunning = false;
+      clearInterval(spawnInterval);
 
-      // rank players
-      let ranking = [...players].sort((a, b) => b.score - a.score);
+      let ranking = [...players].sort((a,b) => b.score - a.score);
 
-      // draw background
       ctx.fillStyle = "rgba(0,0,0,0.8)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // podium
       const baseY = canvas.height - 100;
       const podiumWidth = 150;
 
-      // 2nd place (left)
-      ctx.fillStyle = "#aaa";
-      ctx.fillRect(canvas.width/2 - podiumWidth - 50, baseY - 100, podiumWidth, 100);
-
-      // 1st place (middle)
-      ctx.fillStyle = "#ffd700";
-      ctx.fillRect(canvas.width/2 - podiumWidth/2, baseY - 150, podiumWidth, 150);
-
-      // 3rd place (right)
-      ctx.fillStyle = "#cd7f32";
-      ctx.fillRect(canvas.width/2 + podiumWidth/2 + 50 - podiumWidth, baseY - 80, podiumWidth, 80);
+      // podium bars
+      ctx.fillStyle = "#aaa"; ctx.fillRect(canvas.width/2 - podiumWidth - 50, baseY - 100, podiumWidth, 100);
+      ctx.fillStyle = "#ffd700"; ctx.fillRect(canvas.width/2 - podiumWidth/2, baseY - 150, podiumWidth, 150);
+      ctx.fillStyle = "#cd7f32"; ctx.fillRect(canvas.width/2 + podiumWidth/2 + 50 - podiumWidth, baseY - 80, podiumWidth, 80);
 
       ctx.fillStyle = "white";
       ctx.font = "24px Arial";
       if (ranking[1]) ctx.fillText(`${ranking[1].name} (${ranking[1].score})`, canvas.width/2 - podiumWidth, baseY - 110);
       if (ranking[0]) ctx.fillText(`${ranking[0].name} (${ranking[0].score})`, canvas.width/2 - 40, baseY - 160);
       if (ranking[2]) ctx.fillText(`${ranking[2].name} (${ranking[2].score})`, canvas.width/2 + podiumWidth/2 + 10, baseY - 90);
+
+      // draw player heads
+      ranking.forEach((p,i) => {
+        let x = canvas.width/2 + (i-1)*200;
+        let y = baseY - ((i===0)?150:(i===1?100:80)) - 30;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(x + podiumWidth/2, y, 30, 0, Math.PI*2);
+        ctx.fill();
+      });
 
       playAgainBtn.style.display = "block";
     }
@@ -244,6 +274,7 @@
       document.getElementById("menu").style.display = "block";
       canvas.style.display = "none";
       playAgainBtn.style.display = "none";
+      feedbacks = [];
     }
   </script>
 </body>
