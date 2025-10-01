@@ -1,266 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Brainrot Collector</title>
+  <meta charset="UTF-8">
+  <title>Steal a Riley — Brainrot Race</title>
   <style>
     body {
       margin: 0;
-      overflow: hidden;
+      background: linear-gradient(135deg, #ff7ce5, #87cefa);
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #ffb6e6, #7ec8ff);
-      touch-action: none;
+      overflow: hidden;
     }
-
-    /* repeating 67 background */
-    body::before {
-      content: "67 67 67 67 67 67 67 67 67 67 67 67 67 67 67 67";
-      position: fixed;
-      inset: 0;
-      font-size: 60px;
-      line-height: 60px;
-      color: #ff69b4;
-      opacity: 0.2;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      z-index: -1;
-    }
-
-    /* neon pink title */
-    #title {
+    h1 {
       position: absolute;
-      top: 15px;
+      top: 10px;
       right: 20px;
       font-size: 48px;
-      font-weight: bold;
-      color: #ff4fd8;
-      text-shadow: 0 0 6px #ff4fd8, 0 0 12px #ff4fd8, 0 0 24px #ff1cd2;
-      z-index: 20;
-      pointer-events: none;
+      color: #ff00ff;
+      text-shadow: 0 0 10px #ff66ff, 0 0 20px #ff00ff;
     }
-
-    #end {
+    #menu {
       position: absolute;
-      inset: 0;
-      background: rgba(255,255,255,0.9);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px 40px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    }
+    #gameCanvas {
       display: none;
+      background: repeating-linear-gradient(
+        45deg, #ffe6ff 0px, #ffe6ff 40px, #e0f7ff 40px, #e0f7ff 80px
+      );
     }
-
-    #end h1 { font-size: 36px; color: #ff69b4; }
-
-    canvas {
-      display: block;
-      width: 100vw;
-      height: 100vh;
-    }
-
-    #score {
+    #scoreBoard {
       position: absolute;
       bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 22px;
-      font-weight: bold;
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 18px;
-      border: none;
-      border-radius: 6px;
-      background: #ff69b4;
+      left: 10px;
+      font-size: 20px;
       color: white;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+    #playAgain {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+      background: #ff66ff;
+      color: white;
+      padding: 12px 24px;
+      font-size: 20px;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <!-- Title -->
-  <div id="title">STEAL A RILEY</div>
+  <h1>Steal a Riley</h1>
 
-  <!-- End screen -->
-  <div id="end">
-    <h1 id="winnerText"></h1>
-    <canvas id="podiumCanvas"></canvas>
-    <button onclick="location.reload()">Play Again</button>
+  <div id="menu">
+    <h2>Select Difficulty</h2>
+    <button onclick="startGame('easy')">Easy</button>
+    <button onclick="startGame('hard')">Hard (Race with Bots)</button>
   </div>
 
-  <canvas id="gameCanvas"></canvas>
-  <div id="score">Score: 0</div>
+  <canvas id="gameCanvas" width="1000" height="600"></canvas>
+  <div id="scoreBoard">Score: 0</div>
+  <button id="playAgain" onclick="restartGame()">Play Again</button>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    let brainrots = [], players = [], gameOver = false;
+    const scoreBoard = document.getElementById("scoreBoard");
+    const playAgainBtn = document.getElementById("playAgain");
 
-    function resizeCanvas(){
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
+    let gameRunning = false;
+    let difficulty = "easy";
+    let targetScore = 10;
+    let brainrots = [];
+    let players = [];
 
-    function init(){
-      brainrots=[];
-      for(let i=0;i<20;i++){
-        brainrots.push({
-          x:Math.random()*(canvas.width-60)+30,
-          y:Math.random()*(canvas.height-60)+30,
-          r:25,
-          dx:(Math.random()*2-1)*1.2,
-          dy:(Math.random()*2-1)*1.2
-        });
+    class Player {
+      constructor(name, isBot=false, color="white") {
+        this.name = name;
+        this.isBot = isBot;
+        this.score = 0;
+        this.color = color;
       }
-
-      players = [
-        {id:1, x:canvas.width/2, y:canvas.height/2, size:30, color:"gold", score:0, isBot:false},
-        {id:2, x:100, y:100, size:30, color:"red", score:0, isBot:true},
-        {id:3, x:canvas.width-100, y:150, size:30, color:"green", score:0, isBot:true}
-      ];
-
-      canvas.addEventListener("click", handleClick);
-      canvas.addEventListener("touchstart", function(e){
-        let touch = e.touches[0];
-        handleClick({clientX:touch.clientX, clientY:touch.clientY});
-      });
-
-      requestAnimationFrame(gameLoop);
-    }
-
-    function handleClick(e){
-      if(gameOver) return;
-      const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-
-      // check if clicked brainrot
-      for(let i=brainrots.length-1;i>=0;i--){
-        let b=brainrots[i];
-        let dist=Math.hypot(mx-b.x,my-b.y);
-        if(dist<b.r){
-          brainrots.splice(i,1);
-          let p=players[0]; // you are always player 1
-          p.score++;
-          p.x = b.x; p.y = b.y;
-          document.getElementById("score").textContent="Score: "+p.score;
-          if(p.score>=10) endGame(p);
-          return;
-        }
-      }
-    }
-
-    function update(){
-      // brainrots move
-      for(let b of brainrots){
-        b.x+=b.dx; b.y+=b.dy;
-        if(b.x<b.r||b.x>canvas.width-b.r) b.dx*=-1;
-        if(b.y<b.r||b.y>canvas.height-b.r) b.dy*=-1;
-      }
-
-      // bots collect brainrots
-      for(let p of players){
-        if(!p.isBot||gameOver) continue;
-        if(brainrots.length>0){
-          let target=brainrots[0];
-          let dx=target.x-p.x;
-          let dy=target.y-p.y;
-          let dist=Math.hypot(dx,dy);
-          if(dist<target.r+20){
-            brainrots.shift();
-            p.score++;
-            if(p.score>=10) endGame(p);
+      updateBot() {
+        if (!this.isBot || brainrots.length === 0) return;
+        // Bots randomly collect brainrots
+        if (Math.random() < (difficulty === "hard" ? 0.05 : 0.02)) {
+          let i = Math.floor(Math.random() * brainrots.length);
+          let br = brainrots[i];
+          if (br.fake) {
+            this.score = Math.max(0, this.score - 1);
           } else {
-            p.x+=dx/dist*1.5;
-            p.y+=dy/dist*1.5;
+            this.score++;
           }
+          brainrots.splice(i, 1);
+          checkWin(this);
         }
       }
     }
 
-    function draw(){
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-
-      // draw brainrots
-      for(let b of brainrots){
-        ctx.fillStyle="blue";
-        ctx.beginPath();
-        ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle="pink";
-        ctx.fillRect(b.x-b.r, b.y-b.r-12, b.r*2, 12);
+    class Brainrot {
+      constructor(x, y, fake=false) {
+        this.x = x;
+        this.y = y;
+        this.fake = fake;
+        this.size = difficulty === "hard" ? 20 : 40;
+        this.dx = (Math.random() - 0.5) * (difficulty === "hard" ? 6 : 3);
+        this.dy = (Math.random() - 0.5) * (difficulty === "hard" ? 6 : 3);
       }
-
-      // draw players
-      for(let p of players){
-        ctx.fillStyle=p.color;
+      draw() {
         ctx.beginPath();
-        ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+        ctx.fillStyle = this.fake ? "gray" : "blue";
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
+        ctx.fillStyle = "pink";
+        ctx.font = "bold 12px Arial";
+        ctx.fillText("💀", this.x - 6, this.y + 4);
+      }
+      update() {
+        this.x += this.dx;
+        this.y += this.dy;
+        if (this.x < this.size || this.x > canvas.width - this.size) this.dx *= -1;
+        if (this.y < this.size || this.y > canvas.height - this.size) this.dy *= -1;
+        this.draw();
       }
     }
 
-    function gameLoop(){
-      if(!gameOver){
-        update();
-        draw();
-        requestAnimationFrame(gameLoop);
+    canvas.addEventListener("click", (e) => {
+      if (!gameRunning) return;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      for (let i = brainrots.length - 1; i >= 0; i--) {
+        const br = brainrots[i];
+        const dist = Math.hypot(mouseX - br.x, mouseY - br.y);
+        if (dist < br.size) {
+          let me = players[0];
+          if (br.fake) {
+            me.score = Math.max(0, me.score - 1);
+          } else {
+            me.score++;
+          }
+          brainrots.splice(i, 1);
+          checkWin(me);
+        }
+      }
+    });
+
+    function startGame(mode) {
+      difficulty = mode;
+      targetScore = (mode === "hard") ? 30 : 10;
+      document.getElementById("menu").style.display = "none";
+      canvas.style.display = "block";
+      playAgainBtn.style.display = "none";
+
+      // reset
+      brainrots = [];
+      players = [];
+
+      // Player 1 (you)
+      players.push(new Player("You", false, "yellow"));
+
+      if (mode === "hard") {
+        players.push(new Player("Bot 1", true, "red"));
+        players.push(new Player("Bot 2", true, "green"));
+      }
+
+      // spawn brainrots
+      for (let i = 0; i < (mode === "hard" ? 20 : 10); i++) {
+        brainrots.push(new Brainrot(
+          Math.random() * canvas.width,
+          Math.random() * canvas.height,
+          mode === "hard" && Math.random() < 0.3
+        ));
+      }
+
+      players.forEach(p => p.score = 0);
+      gameRunning = true;
+      updateScoreboard();
+      animate();
+    }
+
+    function animate() {
+      if (!gameRunning) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      brainrots.forEach(br => br.update());
+      players.forEach(p => p.updateBot());
+      updateScoreboard();
+      requestAnimationFrame(animate);
+    }
+
+    function updateScoreboard() {
+      scoreBoard.innerText = players.map(p => `${p.name}: ${p.score}`).join(" | ");
+    }
+
+    function checkWin(player) {
+      if (player.score >= targetScore) {
+        endGame(player);
       }
     }
 
-    function endGame(winner){
-      gameOver=true;
-      document.getElementById("end").style.display="flex";
-
-      // Podium drawing
-      const podiumCanvas=document.getElementById("podiumCanvas");
-      const pctx=podiumCanvas.getContext("2d");
-      podiumCanvas.width=400;
-      podiumCanvas.height=300;
-
-      // sort players by score
-      let sorted=[...players].sort((a,b)=>b.score-a.score);
-
-      // podium base positions
-      const podiums=[
-        {x:150, y:200, h:120}, // 1st place (middle)
-        {x:50, y:200, h:80},   // 2nd place (left)
-        {x:250, y:200, h:60}   // 3rd place (right)
-      ];
-
-      // draw podiums
-      pctx.fillStyle="gray";
-      podiums.forEach((p,i)=>{
-        pctx.fillRect(p.x, p.y-p.h, 80, p.h);
-      });
-
-      // draw players on podium
-      sorted.forEach((pl,i)=>{
-        let podium=podiums[i];
-        pctx.fillStyle=pl.color;
-        pctx.beginPath();
-        pctx.arc(podium.x+40, podium.y-podium.h-30, 30, 0, Math.PI*2);
-        pctx.fill();
-      });
-
-      // Winner text
-      if(winner.id===1){
-        document.getElementById("winnerText").textContent="🎉 YOU WIN! 🎉";
+    function endGame(winner) {
+      gameRunning = false;
+      ctx.fillStyle = "rgba(0,0,0,0.7)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#fff";
+      ctx.font = "48px Arial";
+      if (winner.name === "You") {
+        ctx.fillText("YOU WIN!", canvas.width / 2 - 120, canvas.height / 2);
+        playConfetti();
       } else {
-        document.getElementById("winnerText").textContent="😢 Bot Player "+winner.id+" Wins!";
+        ctx.fillText(`${winner.name} Wins! YOU LOSE 😭`, canvas.width / 2 - 250, canvas.height / 2);
       }
+      playAgainBtn.style.display = "block";
     }
 
-    init();
+    function restartGame() {
+      document.getElementById("menu").style.display = "block";
+      canvas.style.display = "none";
+      playAgainBtn.style.display = "none";
+    }
+
+    function playConfetti() {
+      for (let i = 0; i < 100; i++) {
+        setTimeout(() => {
+          const x = Math.random() * canvas.width;
+          const y = Math.random() * canvas.height / 2;
+          ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+          ctx.fillRect(x, y, 8, 14);
+        }, i * 20);
+      }
+    }
   </script>
 </body>
 </html>
