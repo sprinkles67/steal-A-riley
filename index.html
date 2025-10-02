@@ -89,8 +89,10 @@
   <button id="playAgain" onclick="restartGame()">Play Again</button>
 
   <!-- Sounds -->
-  <audio id="popSound" src="data:audio/wav;base64,UklGRhYAAABXQVZFZm10IBAAAAABAAEAIlYAAB9AAACAgAgAZGF0YQAAAAA="></audio>
-  <audio id="cheerSound" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAB9AAACAgAgAZGF0YQAAAAA="></audio>
+  <audio id="popSound" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg"></audio>
+  <audio id="cheerSound" src="https://actions.google.com/sounds/v1/crowds/large_crowd_cheer.ogg"></audio>
+  <audio id="tickSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+  <audio id="dramaticSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -101,13 +103,14 @@
 
     const popSound = document.getElementById("popSound");
     const cheerSound = document.getElementById("cheerSound");
+    const tickSound = document.getElementById("tickSound");
+    const dramaticSound = document.getElementById("dramaticSound");
 
     let gameRunning = false;
     let difficulty = "easy";
     let targetScore = 15;
     let brainrots = [];
     let players = [];
-    let confetti = [];
     let sparkles = [];
     let timer = 10;
     let timerInterval;
@@ -223,7 +226,6 @@
 
       brainrots = [];
       players = [];
-      confetti = [];
       sparkles = [];
 
       players.push(new Player("You", false, "yellow"));
@@ -249,6 +251,13 @@
         if (!gameRunning) return;
         timer--;
         timerDisplay.innerText = "Time: " + timer;
+
+        if (timer > 3) {
+          playTickSound();
+        } else if (timer > 0) {
+          playDramaticSound();
+        }
+
         if (timer <= 0) {
           endGame();
         }
@@ -323,6 +332,17 @@
     function playCheerSound() {
       cheerSound.currentTime = 0;
       cheerSound.play();
+    }
+
+    function playTickSound() {
+      tickSound.currentTime = 0;
+      tickSound.play();
+    }
+
+    function playDramaticSound() {
+      dramaticSound.currentTime = 0;
+      dramaticSound.playbackRate = 0.7; // deeper dramatic effect
+      dramaticSound.play();
     }
   </script>
 </body>
