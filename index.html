@@ -14,38 +14,14 @@
       position: absolute;
       top: 10px;
       right: 20px;
-      font-size: 52px;
-      color: #ff33cc;
-      text-shadow: 0 0 8px #ff66ff, 0 0 16px #ff00cc, 0 0 32px #ff33ff;
-      font-family: "Comic Sans MS", cursive, sans-serif;
-      animation: neonPulse 1s infinite alternate;
+      font-size: 48px;
+      color: #ff00ff;
+      text-shadow: 0 0 10px #ff66ff, 0 0 20px #ff00ff, 0 0 40px #ff00ff;
+      animation: glowPulse 2s infinite alternate;
     }
-    #timer {
-      position: absolute;
-      top: 10px;
-      left: 20px;
-      font-size: 32px;
-      color: #ff33cc;
-      text-shadow: 0 0 8px #ff66ff, 0 0 16px #ff00cc, 0 0 32px #ff33ff;
-      font-family: "Comic Sans MS", cursive, sans-serif;
-      animation: neonPulse 1s infinite alternate;
-    }
-    #scoreBoard {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      font-size: 22px;
-      color: #ff33cc;
-      background: rgba(255,255,255,0.2);
-      padding: 8px 14px;
-      border-radius: 8px;
-      text-shadow: 0 0 8px #ff66ff, 0 0 16px #ff00cc, 0 0 32px #ff33ff;
-      animation: neonPulse 1s infinite alternate;
-    }
-    @keyframes neonPulse {
-      0% { text-shadow: 0 0 5px #ff66ff, 0 0 10px #ff00cc, 0 0 20px #ff33ff; }
-      50% { text-shadow: 0 0 12px #ff66ff, 0 0 25px #ff00cc, 0 0 40px #ff33ff; }
-      100% { text-shadow: 0 0 8px #ff66ff, 0 0 16px #ff00cc, 0 0 32px #ff33ff; }
+    @keyframes glowPulse {
+      from { text-shadow: 0 0 10px #ff66ff, 0 0 20px #ff00ff; }
+      to { text-shadow: 0 0 20px #ff99ff, 0 0 40px #ff00ff; }
     }
     #menu {
       position: absolute;
@@ -58,10 +34,29 @@
       text-align: center;
       box-shadow: 0 6px 20px rgba(0,0,0,0.25);
     }
-    canvas { 
-      background: pink; 
-      display: none; 
-      border: 2px solid white; 
+    canvas {
+      background: pink;
+      display: none;
+      margin-top: 20px;
+      border: 2px solid white;
+    }
+    #scoreBoard {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 20px;
+      color: white;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+    #timer {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      font-size: 28px;
+      color: white;
+      text-shadow: 0 0 10px black;
     }
     #playAgain {
       display: none;
@@ -84,14 +79,18 @@
 
   <div id="menu">
     <h2>Select Difficulty</h2>
-    <button onclick="startGame('easy')">Easy (Bots Too)</button>
-    <button onclick="startGame('hard')">Hard (Faster Bots)</button>
+    <button onclick="startGame('easy')">Easy</button>
+    <button onclick="startGame('hard')">Hard (Race with Bots)</button>
   </div>
 
+  <div id="timer">Time: 10</div>
   <canvas id="gameCanvas" width="1000" height="600"></canvas>
   <div id="scoreBoard">Score: 0</div>
-  <div id="timer">Time: 10</div>
   <button id="playAgain" onclick="restartGame()">Play Again</button>
+
+  <!-- Sounds -->
+  <audio id="popSound" src="data:audio/wav;base64,UklGRhYAAABXQVZFZm10IBAAAAABAAEAIlYAAB9AAACAgAgAZGF0YQAAAAA="></audio>
+  <audio id="cheerSound" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAB9AAACAgAgAZGF0YQAAAAA="></audio>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -100,9 +99,12 @@
     const playAgainBtn = document.getElementById("playAgain");
     const timerDisplay = document.getElementById("timer");
 
+    const popSound = document.getElementById("popSound");
+    const cheerSound = document.getElementById("cheerSound");
+
     let gameRunning = false;
     let difficulty = "easy";
-    let targetScore = 10;
+    let targetScore = 15;
     let brainrots = [];
     let players = [];
     let confetti = [];
@@ -116,29 +118,17 @@
         this.isBot = isBot;
         this.score = 0;
         this.color = color;
-        this.x = canvas.width/2;
-        this.y = canvas.height/2;
-      }
-      drawCharacter() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y - 30, 20, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-        ctx.fillStyle = "black";
-        ctx.fillRect(this.x - 8, this.y - 35, 5, 5);
-        ctx.fillRect(this.x + 3, this.y - 35, 5, 5);
-        ctx.beginPath();
-        ctx.arc(this.x - 2, this.y - 25, 10, 0, Math.PI);
-        ctx.stroke();
       }
       updateBot() {
         if (!this.isBot || brainrots.length === 0) return;
-        let chance = (difficulty === "hard") ? 0.03 : 0.005;
-        if (Math.random() < chance) {
+        if (Math.random() < (difficulty === "hard" ? 0.05 : 0.02)) {
           let i = Math.floor(Math.random() * brainrots.length);
           let br = brainrots[i];
-          if (br.fake) this.score = Math.max(0, this.score - 1);
-          else this.score++;
+          if (br.fake) {
+            this.score = Math.max(0, this.score - 1);
+          } else {
+            this.score++;
+          }
           brainrots.splice(i, 1);
           checkWin(this);
         }
@@ -150,7 +140,7 @@
         this.x = x;
         this.y = y;
         this.fake = fake;
-        this.size = difficulty === "hard" ? 25 : 35;
+        this.size = difficulty === "hard" ? 20 : 30;
         this.dx = (Math.random() - 0.5) * (difficulty === "hard" ? 5 : 3);
         this.dy = (Math.random() - 0.5) * (difficulty === "hard" ? 5 : 3);
       }
@@ -196,30 +186,13 @@
       }
     }
 
-    class Confetti {
-      constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.size = Math.random() * 6 + 4;
-        this.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
-        this.dx = (Math.random() - 0.5) * 6;
-        this.dy = Math.random() * -6 - 2;
-        this.gravity = 0.2;
-      }
-      update() {
-        this.x += this.dx;
-        this.y += this.dy;
-        this.dy += this.gravity;
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.size, this.size);
-      }
-    }
-
+    // Clicking brainrots
     canvas.addEventListener("click", (e) => {
       if (!gameRunning) return;
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
+
       for (let i = brainrots.length - 1; i >= 0; i--) {
         const br = brainrots[i];
         const dist = Math.hypot(mouseX - br.x, mouseY - br.y);
@@ -227,10 +200,12 @@
           let me = players[0];
           if (br.fake) {
             me.score = Math.max(0, me.score - 1);
-            for (let j = 0; j < 8; j++) sparkles.push(new Sparkle(br.x, br.y, "red"));
           } else {
             me.score++;
-            for (let j = 0; j < 12; j++) sparkles.push(new Sparkle(br.x, br.y, "lime"));
+            playPopSound();
+            for (let s = 0; s < 10; s++) {
+              sparkles.push(new Sparkle(br.x, br.y, "yellow"));
+            }
           }
           brainrots.splice(i, 1);
           checkWin(me);
@@ -240,18 +215,21 @@
 
     function startGame(mode) {
       difficulty = mode;
-      timer = 10;
+      timer = 10; 
       targetScore = (mode === "hard") ? 35 : 15;
       document.getElementById("menu").style.display = "none";
       canvas.style.display = "block";
       playAgainBtn.style.display = "none";
+
       brainrots = [];
       players = [];
       confetti = [];
       sparkles = [];
+
       players.push(new Player("You", false, "yellow"));
       players.push(new Player("Bot 1", true, "red"));
       players.push(new Player("Bot 2", true, "green"));
+
       let count = (mode === "hard") ? 20 : 15;
       for (let i = 0; i < count; i++) {
         brainrots.push(new Brainrot(
@@ -260,16 +238,20 @@
           Math.random() < (mode === "hard" ? 0.2 : 0.15)
         ));
       }
+
       players.forEach(p => p.score = 0);
       gameRunning = true;
       updateScoreboard();
       animate();
+
       clearInterval(timerInterval);
       timerInterval = setInterval(() => {
         if (!gameRunning) return;
         timer--;
         timerDisplay.innerText = "Time: " + timer;
-        if (timer <= 0) endGame();
+        if (timer <= 0) {
+          endGame();
+        }
       }, 1000);
     }
 
@@ -277,12 +259,8 @@
       if (!gameRunning) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       brainrots.forEach(br => br.update());
-      players.forEach(p => {
-        p.updateBot();
-        if (!p.isBot) p.drawCharacter();
-      });
+      players.forEach(p => p.updateBot());
       sparkles = sparkles.filter(s => s.update());
-      animateConfetti();
       updateScoreboard();
       requestAnimationFrame(animate);
     }
@@ -292,31 +270,38 @@
     }
 
     function checkWin(player) {
-      if (player.score >= targetScore) endGame();
+      if (player.score >= targetScore) {
+        endGame();
+      }
     }
 
     function endGame() {
       gameRunning = false;
       clearInterval(timerInterval);
+      playCheerSound();
+
       let ranking = [...players].sort((a, b) => b.score - a.score);
-      ctx.fillStyle = "rgba(0,0,0,0.7)";
+
+      ctx.fillStyle = "rgba(0,0,0,0.8)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
       drawPodiumAndWinners(ranking);
-      for (let i = 0; i < 150; i++) confetti.push(new Confetti(canvas.width/2, canvas.height/2));
       playAgainBtn.style.display = "block";
     }
 
     function drawPodiumAndWinners(ranking) {
       const baseY = canvas.height - 100;
       const podiumWidth = 150;
+
       ctx.fillStyle = "#aaa";
       ctx.fillRect(canvas.width/2 - podiumWidth - 50, baseY - 100, podiumWidth, 100);
-      ctx.shadowColor = "#fff"; ctx.shadowBlur = 20;
+
       ctx.fillStyle = "#ffd700";
       ctx.fillRect(canvas.width/2 - podiumWidth/2, baseY - 150, podiumWidth, 150);
+
       ctx.fillStyle = "#cd7f32";
       ctx.fillRect(canvas.width/2 + podiumWidth/2 + 50 - podiumWidth, baseY - 80, podiumWidth, 80);
-      ctx.shadowBlur = 0;
+
       ctx.fillStyle = "white";
       ctx.font = "24px Arial";
       if (ranking[1]) ctx.fillText(`${ranking[1].name} (${ranking[1].score})`, canvas.width/2 - podiumWidth, baseY - 110);
@@ -324,16 +309,20 @@
       if (ranking[2]) ctx.fillText(`${ranking[2].name} (${ranking[2].score})`, canvas.width/2 + podiumWidth/2 + 10, baseY - 90);
     }
 
-    function animateConfetti() {
-      confetti.forEach(c => c.update());
-    }
-
     function restartGame() {
       document.getElementById("menu").style.display = "block";
       canvas.style.display = "none";
       playAgainBtn.style.display = "none";
-      scoreBoard.innerText = "Score: 0";
-      timerDisplay.innerText = "Time: 10";
+    }
+
+    function playPopSound() {
+      popSound.currentTime = 0;
+      popSound.play();
+    }
+
+    function playCheerSound() {
+      cheerSound.currentTime = 0;
+      cheerSound.play();
     }
   </script>
 </body>
