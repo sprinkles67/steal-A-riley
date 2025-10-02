@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+      <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -82,7 +82,7 @@
     let targetScore = 10;
     let brainrots = [];
     let players = [];
-    let roundTime = 15; 
+    let roundTime = 15;
     let timerId;
 
     class Player {
@@ -94,31 +94,6 @@
         this.x = 500;
         this.y = 300;
       }
-
-      updatePlayer() {
-        if (this.isBot) return;
-
-        if (brainrots.length > 0) {
-          let nearest = brainrots.reduce((prev, curr) => {
-            const dPrev = Math.hypot(this.x - prev.x, this.y - prev.y);
-            const dCurr = Math.hypot(this.x - curr.x, this.y - curr.y);
-            return dCurr < dPrev ? curr : prev;
-          });
-
-          const dx = nearest.x - this.x;
-          const dy = nearest.y - this.y;
-          const dist = Math.hypot(dx, dy);
-          const speed = 3;
-          if (dist > speed) {
-            this.x += (dx / dist) * speed;
-            this.y += (dy / dist) * speed;
-          } else {
-            this.x = nearest.x;
-            this.y = nearest.y;
-          }
-        }
-      }
-
       updateBot() {
         if (!this.isBot || brainrots.length === 0) return;
         if (Math.random() < (difficulty === "hard" ? 0.05 : 0.02)) {
@@ -133,11 +108,30 @@
           checkWin(this);
         }
       }
-
+      updatePlayer() {
+        if (this.isBot) return;
+        if (brainrots.length > 0) {
+          let nearest = brainrots.reduce((prev, curr) => {
+            const dPrev = Math.hypot(this.x - prev.x, this.y - prev.y);
+            const dCurr = Math.hypot(this.x - curr.x, this.y - curr.y);
+            return dCurr < dPrev ? curr : prev;
+          });
+          const dx = nearest.x - this.x;
+          const dy = nearest.y - this.y;
+          const dist = Math.hypot(dx, dy);
+          const speed = 3;
+          if (dist > speed) {
+            this.x += (dx / dist) * speed;
+            this.y += (dy / dist) * speed;
+          } else {
+            this.x = nearest.x;
+            this.y = nearest.y;
+          }
+        }
+      }
       drawCharacter() {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x - 10, this.y, 20, 40);
-
         ctx.beginPath();
         ctx.arc(this.x, this.y - 20, 20, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
@@ -203,17 +197,13 @@
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
-
       for (let i = brainrots.length - 1; i >= 0; i--) {
         const br = brainrots[i];
         const dist = Math.hypot(mouseX - br.x, mouseY - br.y);
         if (dist < br.size) {
           let me = players[0];
-          if (br.fake) {
-            me.score = Math.max(0, me.score - 1);
-          } else {
-            me.score++;
-          }
+          if (br.fake) me.score = Math.max(0, me.score - 1);
+          else me.score++;
           brainrots.splice(i, 1);
           checkWin(me);
         }
@@ -229,14 +219,11 @@
 
       brainrots = [];
       players = [];
-
       players.push(new Player("You", false, "yellow"));
-
       if (mode === "hard") {
         players.push(new Player("Bot 1", true, "red"));
         players.push(new Player("Bot 2", true, "green"));
       }
-
       for (let i = 0; i < (mode === "hard" ? 20 : 10); i++) {
         brainrots.push(new Brainrot(
           Math.random() * canvas.width,
@@ -244,13 +231,11 @@
           mode === "hard" && Math.random() < 0.3
         ));
       }
-
       players.forEach(p => p.score = 0);
       gameRunning = true;
       roundTime = 15;
       updateScoreboard();
       animate();
-
       clearInterval(timerId);
       timerId = setInterval(() => {
         roundTime--;
@@ -275,43 +260,72 @@
     }
 
     function updateScoreboard() {
-      scoreBoard.innerText =
-        `Time: ${roundTime}s | ` +
+      scoreBoard.innerText = `Time: ${roundTime}s | ` +
         players.map(p => `${p.name}: ${p.score}`).join(" | ");
     }
 
     function checkWin(player) {
       if (player.score >= targetScore) {
-        clearInterval(timerId);
         endGame();
       }
     }
 
     function endGame() {
       gameRunning = false;
-
+      clearInterval(timerId);
       let ranking = [...players].sort((a, b) => b.score - a.score);
-
       ctx.fillStyle = "rgba(0,0,0,0.8)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const baseY = canvas.height - 100;
       const podiumWidth = 150;
 
+      // 2nd place
       ctx.fillStyle = "#aaa";
       ctx.fillRect(canvas.width/2 - podiumWidth - 50, baseY - 100, podiumWidth, 100);
 
+      // 1st place glowing
+      ctx.save();
+      ctx.shadowColor = "gold";
+      ctx.shadowBlur = 40;
       ctx.fillStyle = "#ffd700";
       ctx.fillRect(canvas.width/2 - podiumWidth/2, baseY - 150, podiumWidth, 150);
+      ctx.restore();
 
+      // 3rd place
       ctx.fillStyle = "#cd7f32";
       ctx.fillRect(canvas.width/2 + podiumWidth/2 + 50 - podiumWidth, baseY - 80, podiumWidth, 80);
 
-      ctx.fillStyle = "white";
+      // Characters on podium
+      if (ranking[0]) {
+        ranking[0].x = canvas.width/2; 
+        ranking[0].y = baseY - 150; 
+        ranking[0].drawCharacter();
+      }
+      if (ranking[1]) {
+        ranking[1].x = canvas.width/2 - podiumWidth; 
+        ranking[1].y = baseY - 100; 
+        ranking[1].drawCharacter();
+      }
+      if (ranking[2]) {
+        ranking[2].x = canvas.width/2 + podiumWidth/2 + 10; 
+        ranking[2].y = baseY - 80; 
+        ranking[2].drawCharacter();
+      }
+
+      // Names & scores
       ctx.font = "24px Arial";
-      if (ranking[1]) ctx.fillText(`${ranking[1].name} (${ranking[1].score})`, canvas.width/2 - podiumWidth, baseY - 110);
-      if (ranking[0]) ctx.fillText(`${ranking[0].name} (${ranking[0].score})`, canvas.width/2 - 40, baseY - 160);
-      if (ranking[2]) ctx.fillText(`${ranking[2].name} (${ranking[2].score})`, canvas.width/2 + podiumWidth/2 + 10, baseY - 90);
+      ctx.fillStyle = "white";
+      if (ranking[1]) ctx.fillText(`${ranking[1].name} (${ranking[1].score})`, ranking[1].x - 40, ranking[1].y - 60);
+      if (ranking[0]) {
+        ctx.save();
+        ctx.shadowColor = "gold";
+        ctx.shadowBlur = 30;
+        ctx.fillStyle = "#fffacd";
+        ctx.fillText(`${ranking[0].name} (${ranking[0].score})`, ranking[0].x - 40, ranking[0].y - 70);
+        ctx.restore();
+      }
+      if (ranking[2]) ctx.fillText(`${ranking[2].name} (${ranking[2}.score})`, ranking[2].x - 40, ranking[2].y - 60);
 
       playAgainBtn.style.display = "block";
     }
