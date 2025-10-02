@@ -82,10 +82,8 @@
     let targetScore = 10;
     let brainrots = [];
     let players = [];
-    let feedbacks = [];
-    let mouseX = 500;
-    let mouseY = 300;
-    let spawnInterval;
+    let roundTime = 15; 
+    let timerId;
 
     class Player {
       constructor(name, isBot=false, color="white") {
@@ -96,60 +94,74 @@
         this.x = 500;
         this.y = 300;
       }
+
+      updatePlayer() {
+        if (this.isBot) return;
+
+        if (brainrots.length > 0) {
+          let nearest = brainrots.reduce((prev, curr) => {
+            const dPrev = Math.hypot(this.x - prev.x, this.y - prev.y);
+            const dCurr = Math.hypot(this.x - curr.x, this.y - curr.y);
+            return dCurr < dPrev ? curr : prev;
+          });
+
+          const dx = nearest.x - this.x;
+          const dy = nearest.y - this.y;
+          const dist = Math.hypot(dx, dy);
+          const speed = 3;
+          if (dist > speed) {
+            this.x += (dx / dist) * speed;
+            this.y += (dy / dist) * speed;
+          } else {
+            this.x = nearest.x;
+            this.y = nearest.y;
+          }
+        }
+      }
+
       updateBot() {
         if (!this.isBot || brainrots.length === 0) return;
-        let chance = (difficulty === "hard" ? 0.05 : 0.02) + this.score / targetScore * 0.1;
-        if (Math.random() < chance) {
+        if (Math.random() < (difficulty === "hard" ? 0.05 : 0.02)) {
           let i = Math.floor(Math.random() * brainrots.length);
           let br = brainrots[i];
-          if (br.fake) this.score = Math.max(0, this.score - 1);
-          else this.score++;
-          showClickFeedback(br.x, br.y, br.fake ? '-1' : '+1');
+          if (br.fake) {
+            this.score = Math.max(0, this.score - 1);
+          } else {
+            this.score++;
+          }
           brainrots.splice(i, 1);
           checkWin(this);
         }
       }
-      drawCharacter() {
-        // Player 1 follows mouse
-        if (!this.isBot) {
-          this.x = mouseX;
-          this.y = mouseY;
-        }
 
-        // Body
+      drawCharacter() {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x - 10, this.y, 20, 40);
 
-        // Head
         ctx.beginPath();
         ctx.arc(this.x, this.y - 20, 20, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
         ctx.fill();
 
-        // Facial features for player 1
         if (!this.isBot) {
-          // Eyes
           ctx.fillStyle = "white";
           ctx.beginPath();
           ctx.arc(this.x - 7, this.y - 22, 5, 0, Math.PI * 2);
           ctx.arc(this.x + 7, this.y - 22, 5, 0, Math.PI * 2);
           ctx.fill();
 
-          // Pupils
           ctx.fillStyle = "black";
           ctx.beginPath();
           ctx.arc(this.x - 7, this.y - 22, 2, 0, Math.PI * 2);
           ctx.arc(this.x + 7, this.y - 22, 2, 0, Math.PI * 2);
           ctx.fill();
 
-          // Mouth
           ctx.strokeStyle = "black";
           ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.arc(this.x, this.y - 15, 7, 0, Math.PI);
           ctx.stroke();
 
-          // Hair
           ctx.fillStyle = "yellow";
           ctx.beginPath();
           ctx.moveTo(this.x - 20, this.y - 35);
@@ -186,35 +198,27 @@
       }
     }
 
-    canvas.addEventListener("mousemove", e => {
-      const rect = canvas.getBoundingClientRect();
-      mouseX = e.clientX - rect.left;
-      mouseY = e.clientY - rect.top;
-    });
-
     canvas.addEventListener("click", (e) => {
       if (!gameRunning) return;
       const rect = canvas.getBoundingClientRect();
-      const mouseXClick = e.clientX - rect.left;
-      const mouseYClick = e.clientY - rect.top;
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
 
       for (let i = brainrots.length - 1; i >= 0; i--) {
         const br = brainrots[i];
-        const dist = Math.hypot(mouseXClick - br.x, mouseYClick - br.y);
+        const dist = Math.hypot(mouseX - br.x, mouseY - br.y);
         if (dist < br.size) {
           let me = players[0];
-          if (br.fake) me.score = Math.max(0, me.score - 1);
-          else me.score++;
-          showClickFeedback(br.x, br.y, br.fake ? '-1' : '+1');
+          if (br.fake) {
+            me.score = Math.max(0, me.score - 1);
+          } else {
+            me.score++;
+          }
           brainrots.splice(i, 1);
           checkWin(me);
         }
       }
     });
-
-    function showClickFeedback(x, y, text) {
-      feedbacks.push({x, y, text, alpha: 1});
-    }
 
     function startGame(mode) {
       difficulty = mode;
@@ -243,64 +247,50 @@
 
       players.forEach(p => p.score = 0);
       gameRunning = true;
+      roundTime = 15;
       updateScoreboard();
       animate();
 
-      // continuous spawn
-      if (mode === "hard") {
-        spawnInterval = setInterval(() => {
-          if (!gameRunning) return;
-          if (brainrots.length < 25) {
-            brainrots.push(new Brainrot(
-              Math.random() * canvas.width,
-              Math.random() * canvas.height,
-              Math.random() < 0.3
-            ));
-          }
-        }, 1000);
-      }
+      clearInterval(timerId);
+      timerId = setInterval(() => {
+        roundTime--;
+        if (roundTime <= 0) {
+          clearInterval(timerId);
+          endGame();
+        }
+      }, 1000);
     }
 
     function animate() {
       if (!gameRunning) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       brainrots.forEach(br => br.update());
       players.forEach(p => {
-        if (!p.isBot) p.drawCharacter(); // draw player 1
-        else p.updateBot(); // bots
+        if (p.isBot) p.updateBot();
+        else p.updatePlayer();
+        p.drawCharacter();
       });
       updateScoreboard();
-
-      // draw feedbacks
-      for (let i = feedbacks.length - 1; i >= 0; i--) {
-        const f = feedbacks[i];
-        ctx.fillStyle = `rgba(255,255,255,${f.alpha})`;
-        ctx.font = "20px Arial";
-        ctx.fillText(f.text, f.x, f.y);
-        f.y -= 1;
-        f.alpha -= 0.02;
-        if (f.alpha <= 0) feedbacks.splice(i, 1);
-      }
-
       requestAnimationFrame(animate);
     }
 
     function updateScoreboard() {
-      scoreBoard.innerText = players.map(p => `${p.name}: ${p.score}`).join(" | ");
+      scoreBoard.innerText =
+        `Time: ${roundTime}s | ` +
+        players.map(p => `${p.name}: ${p.score}`).join(" | ");
     }
 
     function checkWin(player) {
       if (player.score >= targetScore) {
+        clearInterval(timerId);
         endGame();
       }
     }
 
     function endGame() {
       gameRunning = false;
-      clearInterval(spawnInterval);
 
-      let ranking = [...players].sort((a,b) => b.score - a.score);
+      let ranking = [...players].sort((a, b) => b.score - a.score);
 
       ctx.fillStyle = "rgba(0,0,0,0.8)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -308,62 +298,20 @@
       const baseY = canvas.height - 100;
       const podiumWidth = 150;
 
-      // podium bars
-      ctx.fillStyle = "#aaa"; ctx.fillRect(canvas.width/2 - podiumWidth - 50, baseY - 100, podiumWidth, 100);
-      ctx.fillStyle = "#ffd700"; ctx.fillRect(canvas.width/2 - podiumWidth/2, baseY - 150, podiumWidth, 150);
-      ctx.fillStyle = "#cd7f32"; ctx.fillRect(canvas.width/2 + podiumWidth/2 + 50 - podiumWidth, baseY - 80, podiumWidth, 80);
+      ctx.fillStyle = "#aaa";
+      ctx.fillRect(canvas.width/2 - podiumWidth - 50, baseY - 100, podiumWidth, 100);
+
+      ctx.fillStyle = "#ffd700";
+      ctx.fillRect(canvas.width/2 - podiumWidth/2, baseY - 150, podiumWidth, 150);
+
+      ctx.fillStyle = "#cd7f32";
+      ctx.fillRect(canvas.width/2 + podiumWidth/2 + 50 - podiumWidth, baseY - 80, podiumWidth, 80);
 
       ctx.fillStyle = "white";
       ctx.font = "24px Arial";
       if (ranking[1]) ctx.fillText(`${ranking[1].name} (${ranking[1].score})`, canvas.width/2 - podiumWidth, baseY - 110);
       if (ranking[0]) ctx.fillText(`${ranking[0].name} (${ranking[0].score})`, canvas.width/2 - 40, baseY - 160);
       if (ranking[2]) ctx.fillText(`${ranking[2].name} (${ranking[2].score})`, canvas.width/2 + podiumWidth/2 + 10, baseY - 90);
-
-      // draw podium characters
-      ranking.forEach((p, i) => {
-        let x = canvas.width/2 + (i - 1) * 200;
-        let y = baseY - ((i===0)?150:(i===1?100:80)) - 30;
-
-        // body
-        ctx.fillStyle = p.color;
-        ctx.fillRect(x + podiumWidth/2 - 10, y, 20, 40);
-
-        // head
-        ctx.beginPath();
-        ctx.arc(x + podiumWidth/2, y - 20, 20, 0, Math.PI*2);
-        ctx.fillStyle = p.color;
-        ctx.fill();
-
-        // Player 1 face
-        if (p.name === "You") {
-          // eyes
-          ctx.fillStyle = "white";
-          ctx.beginPath();
-          ctx.arc(x + podiumWidth/2 - 7, y - 22, 5, 0, Math.PI*2);
-          ctx.arc(x + podiumWidth/2 + 7, y - 22, 5, 0, Math.PI*2);
-          ctx.fill();
-
-          ctx.fillStyle = "black";
-          ctx.beginPath();
-          ctx.arc(x + podiumWidth/2 - 7, y - 22, 2, 0, Math.PI*2);
-          ctx.arc(x + podiumWidth/2 + 7, y - 22, 2, 0, Math.PI*2);
-          ctx.fill();
-
-          // mouth
-          ctx.strokeStyle = "black";
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.arc(x + podiumWidth/2, y - 15, 7, 0, Math.PI);
-          ctx.stroke();
-
-          // hair
-          ctx.fillStyle = "yellow";
-          ctx.beginPath();
-          ctx.moveTo(x + podiumWidth/2 - 20, y - 35);
-          ctx.quadraticCurveTo(x + podiumWidth/2, y - 50, x + podiumWidth/2 + 20, y - 35);
-          ctx.fill();
-        }
-      });
 
       playAgainBtn.style.display = "block";
     }
@@ -372,7 +320,6 @@
       document.getElementById("menu").style.display = "block";
       canvas.style.display = "none";
       playAgainBtn.style.display = "none";
-      feedbacks = [];
     }
   </script>
 </body>
