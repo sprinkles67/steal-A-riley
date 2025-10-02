@@ -1,26 +1,78 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Brainrot Game</title>
+  <title>Steal a Riley — Brainrot Race</title>
   <style>
-    body { text-align: center; background: #111; color: white; font-family: Arial; }
-    canvas { background: #333; display: none; margin-top: 20px; border: 2px solid white; }
-    #scoreBoard { margin: 20px; font-size: 20px; }
-    #playAgain { display: none; margin-top: 20px; padding: 10px 20px; font-size: 18px; }
-    #menu button { padding: 15px 30px; margin: 10px; font-size: 20px; }
+    body {
+      margin: 0;
+      background: pink;   /* whole page background */
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    h1 {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 48px;
+      color: #ff00ff;
+      text-shadow: 0 0 10px #ff66ff, 0 0 20px #ff00ff;
+    }
+    #menu {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px 40px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    }
+    canvas { 
+      background: pink;   /* canvas also pink */
+      display: none;
+      margin-top: 20px;
+      border: 2px solid white;
+    }
+    #scoreBoard {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 20px;
+      color: white;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+    #playAgain {
+      display: none;
+      position: absolute;
+      top: 70%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+      background: #ff66ff;
+      color: white;
+      padding: 12px 24px;
+      font-size: 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <h1>Brainrot Collector</h1>
+  <h1>Steal a Riley</h1>
+
   <div id="menu">
-    <button onclick="startGame('easy')">Easy Mode</button>
-    <button onclick="startGame('hard')">Hard Mode</button>
+    <h2>Select Difficulty</h2>
+    <button onclick="startGame('easy')">Easy</button>
+    <button onclick="startGame('hard')">Hard (Race with Bots)</button>
   </div>
-  <div id="scoreBoard"></div>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
-  <br>
-  <button id="playAgain" onclick="resetGame()">Play Again</button>
+
+  <canvas id="gameCanvas" width="1000" height="600"></canvas>
+  <div id="scoreBoard">Score: 0</div>
+  <button id="playAgain" onclick="restartGame()">Play Again</button>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -28,69 +80,96 @@
     const scoreBoard = document.getElementById("scoreBoard");
     const playAgainBtn = document.getElementById("playAgain");
 
+    let gameRunning = false;
+    let difficulty = "easy";
+    let targetScore = 10;
     let brainrots = [];
     let players = [];
-    let keys = {};
-    let gameRunning = false;
-    let targetScore = 10;
-    let difficulty = "easy";
-    let roundTime = 15; 
+    let roundTime = 15; // seconds
     let timerId;
 
-    class Brainrot {
-      constructor(x, y, isAngry = false) {
-        this.x = x;
-        this.y = y;
-        this.size = 20;
-        this.isAngry = isAngry;
-      }
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = this.isAngry ? "red" : "cyan";
-        ctx.fill();
-        ctx.closePath();
-      }
-    }
-
     class Player {
-      constructor(name, isBot, color) {
+      constructor(name, isBot=false, color="white") {
         this.name = name;
         this.isBot = isBot;
-        this.color = color;
-        this.x = Math.random() * (canvas.width - 40) + 20;
-        this.y = Math.random() * (canvas.height - 40) + 20;
-        this.size = 20;
         this.score = 0;
+        this.color = color;
+        this.x = 100;
+        this.y = 100;
       }
-      move() {
-        if (!this.isBot) {
-          if (keys["ArrowUp"]) this.y -= 5;
-          if (keys["ArrowDown"]) this.y += 5;
-          if (keys["ArrowLeft"]) this.x -= 5;
-          if (keys["ArrowRight"]) this.x += 5;
-        } else {
-          let target = brainrots[0];
-          if (target) {
-            if (target.x > this.x) this.x += 2;
-            if (target.x < this.x) this.x -= 2;
-            if (target.y > this.y) this.y += 2;
-            if (target.y < this.y) this.y -= 2;
+      updateBot() {
+        if (!this.isBot || brainrots.length === 0) return;
+        if (Math.random() < (difficulty === "hard" ? 0.05 : 0.02)) {
+          let i = Math.floor(Math.random() * brainrots.length);
+          let br = brainrots[i];
+          if (br.fake) {
+            this.score = Math.max(0, this.score - 1);
+          } else {
+            this.score++;
           }
+          brainrots.splice(i, 1);
+          checkWin(this);
         }
       }
       drawCharacter() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y - 30, 20, 0, Math.PI * 2); // head
         ctx.fill();
-        ctx.closePath();
-
-        ctx.fillStyle = "white";
-        ctx.font = "12px Arial";
-        ctx.fillText(this.name, this.x - 15, this.y - 30);
+        ctx.fillRect(this.x - 10, this.y - 10, 20, 30);   // body
       }
     }
+
+    class Brainrot {
+      constructor(x, y, fake=false) {
+        this.x = x;
+        this.y = y;
+        this.fake = fake;
+        this.size = difficulty === "hard" ? 20 : 40;
+        this.dx = (Math.random() - 0.5) * (difficulty === "hard" ? 6 : 3);
+        this.dy = (Math.random() - 0.5) * (difficulty === "hard" ? 6 : 3);
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.fillStyle = this.fake ? "gray" : "blue";
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "pink";
+        ctx.font = "bold 12px Arial";
+        ctx.fillText("💀", this.x - 6, this.y + 4);
+      }
+      update() {
+        this.x += this.dx;
+        this.y += this.dy;
+        if (this.x < this.size || this.x > canvas.width - this.size) this.dx *= -1;
+        if (this.y < this.size || this.y > canvas.height - this.size) this.dy *= -1;
+        this.draw();
+      }
+    }
+
+    // Player clicks brainrots
+    canvas.addEventListener("click", (e) => {
+      if (!gameRunning) return;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      for (let i = brainrots.length - 1; i >= 0; i--) {
+        const br = brainrots[i];
+        const dist = Math.hypot(mouseX - br.x, mouseY - br.y);
+
+        if (dist < br.size) {
+          let me = players[0]; // Player 1
+          if (br.fake) {
+            me.score = Math.max(0, me.score - 1);
+          } else {
+            me.score++;
+          }
+          brainrots.splice(i, 1);
+          checkWin(me);
+        }
+      }
+    });
 
     function startGame(mode) {
       difficulty = mode;
@@ -103,6 +182,7 @@
       players = [];
 
       players.push(new Player("You", false, "yellow"));
+
       if (mode === "hard") {
         players.push(new Player("Bot 1", true, "red"));
         players.push(new Player("Bot 2", true, "green"));
@@ -118,15 +198,13 @@
 
       players.forEach(p => p.score = 0);
       gameRunning = true;
-      roundTime = 15; // reset each round
+      roundTime = 15; // reset
       updateScoreboard();
       animate();
 
-      // start countdown timer
       clearInterval(timerId);
       timerId = setInterval(() => {
         roundTime--;
-        updateScoreboard();
         if (roundTime <= 0) {
           clearInterval(timerId);
           endGame();
@@ -134,11 +212,13 @@
       }, 1000);
     }
 
-    function resetGame() {
-      document.getElementById("menu").style.display = "block";
-      canvas.style.display = "none";
-      playAgainBtn.style.display = "none";
-      scoreBoard.innerText = "";
+    function animate() {
+      if (!gameRunning) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      brainrots.forEach(br => br.update());
+      players.forEach(p => p.updateBot());
+      updateScoreboard();
+      requestAnimationFrame(animate);
     }
 
     function updateScoreboard() {
@@ -147,39 +227,10 @@
         players.map(p => `${p.name}: ${p.score}`).join(" | ");
     }
 
-    function animate() {
-      if (!gameRunning) return;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      brainrots.forEach(brainrot => brainrot.draw());
-      players.forEach(player => {
-        player.move();
-        player.drawCharacter();
-
-        brainrots.forEach((brainrot, i) => {
-          let dx = player.x - brainrot.x;
-          let dy = player.y - brainrot.y;
-          let dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < player.size + brainrot.size) {
-            if (brainrot.isAngry) {
-              player.score = Math.max(0, player.score - 2);
-            } else {
-              player.score++;
-            }
-            brainrots.splice(i, 1);
-          }
-        });
-      });
-
-      updateScoreboard();
-
-      if (players.some(p => p.score >= targetScore)) {
+    function checkWin(player) {
+      if (player.score >= targetScore) {
         endGame();
-        return;
       }
-
-      requestAnimationFrame(animate);
     }
 
     function endGame() {
@@ -210,24 +261,24 @@
       ctx.fillStyle = "#cd7f32";
       ctx.fillRect(canvas.width/2 + podiumWidth/2 + 50 - podiumWidth, baseY - 80, podiumWidth, 80);
 
-      // Draw characters standing on podiums
+      // Characters on podium
       if (ranking[0]) {
-        ranking[0].x = canvas.width/2; 
-        ranking[0].y = baseY - 150; 
+        ranking[0].x = canvas.width/2;
+        ranking[0].y = baseY - 150;
         ranking[0].drawCharacter();
       }
       if (ranking[1]) {
-        ranking[1].x = canvas.width/2 - podiumWidth; 
-        ranking[1].y = baseY - 100; 
+        ranking[1].x = canvas.width/2 - podiumWidth;
+        ranking[1].y = baseY - 100;
         ranking[1].drawCharacter();
       }
       if (ranking[2]) {
-        ranking[2].x = canvas.width/2 + podiumWidth/2 + 10; 
-        ranking[2].y = baseY - 80; 
+        ranking[2].x = canvas.width/2 + podiumWidth/2 + 10;
+        ranking[2].y = baseY - 80;
         ranking[2].drawCharacter();
       }
 
-      // Write names & scores above each
+      // Names & scores
       ctx.font = "24px Arial";
       ctx.fillStyle = "white";
 
@@ -247,15 +298,11 @@
       playAgainBtn.style.display = "block";
     }
 
-    document.addEventListener("keydown", e => { keys[e.key] = true; });
-    document.addEventListener("keyup", e => { keys[e.key] = false; });
+    function restartGame() {
+      document.getElementById("menu").style.display = "block";
+      canvas.style.display = "none";
+      playAgainBtn.style.display = "none";
+    }
   </script>
 </body>
 </html>
-canvas { 
-  background: pink; 
-  display: none; 
-  margin-top: 20px; 
-  border: 2px solid white; 
-}
-
