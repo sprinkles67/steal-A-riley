@@ -1,303 +1,361 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Steal a Riley</title>
-<style>
-  body {
-    margin: 0;
-    background: pink;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
-    text-align: center;
-    color: white;
-  }
-  #menu, #scoreBoard, #playAgainBtn {
-    margin-top: 20px;
-  }
-  canvas {
-    background: pink;
-    display: none;
-    margin-top: 20px;
-    border: 2px solid white;
-  }
-  h1 {
-    font-size: 48px;
-    background: linear-gradient(45deg, #ff0080, #ffcc00, #00ffcc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 20px rgba(255, 192, 203, 0.8);
-  }
-  button {
-    padding: 10px 20px;
-    margin: 5px;
-    font-size: 20px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    background: white;
-    color: #ff0080;
-    font-weight: bold;
-    transition: transform 0.2s;
-  }
-  button:hover {
-    transform: scale(1.1);
-  }
-  #timerBar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 15px;
-    background: linear-gradient(90deg, #00ffcc, #ff00ff);
-    transition: width 1s linear;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Steal a Riley — Brainrot Race</title>
+  <style>
+    body {
+      margin: 0;
+      background: pink;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    h1 {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 52px;
+      color: #ff33cc;
+      text-shadow: 0 0 8px #ff66ff, 0 0 16px #ff00cc, 0 0 32px #ff33ff;
+      font-family: "Comic Sans MS", cursive, sans-serif;
+    }
+    #menu {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px 40px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    }
+    canvas { 
+      background: pink; 
+      display: none; 
+      margin-top: 20px; 
+      border: 2px solid white; 
+    }
+    #scoreBoard {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 20px;
+      color: white;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+    #timer {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      font-size: 28px;
+      color: white;
+      text-shadow: 0 0 10px #000;
+    }
+    #playAgain {
+      display: none;
+      position: absolute;
+      top: 70%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+      background: #ff66ff;
+      color: white;
+      padding: 12px 24px;
+      font-size: 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <h1>Steal a Riley</h1>
+
   <div id="menu">
-    <button onclick="startGame('easy')">Easy</button>
-    <button onclick="startGame('hard')">Hard</button>
+    <h2>Select Difficulty</h2>
+    <button onclick="startGame('easy')">Easy (Bots Too)</button>
+    <button onclick="startGame('hard')">Hard (Faster Bots)</button>
   </div>
-  <div id="scoreBoard"></div>
-  <div id="timerBar"></div>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
-  <button id="playAgainBtn" onclick="showMenu()" style="display:none;">Play Again</button>
 
-<script>
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-const scoreBoard = document.getElementById("scoreBoard");
-const playAgainBtn = document.getElementById("playAgainBtn");
-const timerBar = document.getElementById("timerBar");
+  <canvas id="gameCanvas" width="1000" height="600"></canvas>
+  <div id="scoreBoard">Score: 0</div>
+  <div id="timer">Time: 15</div>
+  <button id="playAgain" onclick="restartGame()">Play Again</button>
 
-let brainrots = [];
-let players = [];
-let gameRunning = false;
-let targetScore = 10;
-let difficulty = "easy";
-let roundTime = 15;
-let timerId;
-let confetti = [];
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreBoard = document.getElementById("scoreBoard");
+    const playAgainBtn = document.getElementById("playAgain");
+    const timerDisplay = document.getElementById("timer");
 
-class Brainrot {
-  constructor(x, y, fake=false) {
-    this.x = x;
-    this.y = y;
-    this.size = 15;
-    this.fake = fake;
-  }
-  draw() {
-    ctx.beginPath();
-    ctx.fillStyle = this.fake ? "black" : "white";
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
+    let gameRunning = false;
+    let difficulty = "easy";
+    let targetScore = 10;
+    let brainrots = [];
+    let players = [];
+    let confetti = [];
+    let sparkles = [];
+    let timer = 15;
+    let timerInterval;
 
-class Player {
-  constructor(name, bot=false, color="yellow", botSkill=1) {
-    this.name = name;
-    this.bot = bot;
-    this.score = 0;
-    this.x = Math.random() * canvas.width;
-    this.y = Math.random() * canvas.height;
-    this.color = color;
-    this.botSkill = botSkill; // speed advantage
-  }
-  update() {
-    if (this.bot) {
-      let target = brainrots[Math.floor(Math.random() * brainrots.length)];
-      if (target) {
-        this.x += (target.x - this.x) * 0.03 * this.botSkill;
-        this.y += (target.y - this.y) * 0.03 * this.botSkill;
-        if (Math.hypot(this.x - target.x, this.y - target.y) < 20) {
-          if (target.fake) this.score = Math.max(0, this.score - 1);
-          else this.score++;
-          brainrots.splice(brainrots.indexOf(target), 1);
+    class Player {
+      constructor(name, isBot=false, color="white") {
+        this.name = name;
+        this.isBot = isBot;
+        this.score = 0;
+        this.color = color;
+        this.x = canvas.width/2;
+        this.y = canvas.height/2;
+      }
+      drawCharacter() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y - 30, 20, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.fillStyle = "black";
+        ctx.fillRect(this.x - 8, this.y - 35, 5, 5);
+        ctx.fillRect(this.x + 3, this.y - 35, 5, 5);
+        ctx.beginPath();
+        ctx.arc(this.x - 2, this.y - 25, 10, 0, Math.PI);
+        ctx.stroke();
+      }
+      updateBot() {
+        if (!this.isBot || brainrots.length === 0) return;
+        let chance = (difficulty === "hard") ? 0.03 : 0.01;
+        if (Math.random() < chance) {
+          let i = Math.floor(Math.random() * brainrots.length);
+          let br = brainrots[i];
+          if (br.fake) {
+            this.score = Math.max(0, this.score - 1);
+          } else {
+            this.score++;
+          }
+          brainrots.splice(i, 1);
+          checkWin(this);
         }
       }
     }
-  }
-  drawCharacter() {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 20, 0, Math.PI * 2);
-    ctx.fillStyle = this.color;
-    ctx.fill();
-    ctx.fillStyle = "blue";
-    ctx.beginPath(); ctx.arc(this.x - 7, this.y - 5, 4, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(this.x + 7, this.y - 5, 4, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = "black";
-    ctx.beginPath(); ctx.arc(this.x, this.y + 5, 8, 0, Math.PI); ctx.stroke();
-  }
-}
 
-class Confetti {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-    this.size = Math.random() * 6 + 4;
-    this.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
-    this.dx = (Math.random() - 0.5) * 6;
-    this.dy = Math.random() * -6 - 2;
-    this.gravity = 0.2;
-  }
-  update() {
-    this.x += this.dx;
-    this.y += this.dy;
-    this.dy += this.gravity;
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.size, this.size);
-  }
-}
-
-function startGame(mode) {
-  difficulty = mode;
-  targetScore = (mode === "hard") ? 30 : 10;
-  document.getElementById("menu").style.display = "none";
-  canvas.style.display = "block";
-  playAgainBtn.style.display = "none";
-
-  brainrots = [];
-  players = [];
-  confetti = [];
-
-  // player 1
-  players.push(new Player("You", false, "yellow"));
-
-  // both easy and hard have bots
-  players.push(new Player("Bot 1", true, "red", mode === "hard" ? 1.1 : 0.8));
-  players.push(new Player("Bot 2", true, "green", mode === "hard" ? 1.1 : 0.8));
-
-  // brainrots
-  for (let i = 0; i < (mode === "hard" ? 15 : 10); i++) {
-    brainrots.push(new Brainrot(
-      Math.random() * canvas.width,
-      Math.random() * canvas.height,
-      mode === "hard" && Math.random() < 0.2 // easier hard: fewer fakes
-    ));
-  }
-
-  players.forEach(p => p.score = 0);
-  gameRunning = true;
-  roundTime = 15;
-  updateScoreboard();
-  animate();
-
-  // timer bar setup
-  timerBar.style.width = "100%";
-  timerBar.style.display = "block";
-
-  clearInterval(timerId);
-  timerId = setInterval(() => {
-    roundTime--;
-    timerBar.style.width = `${(roundTime/15)*100}%`;
-    updateScoreboard();
-    if (roundTime <= 0) {
-      clearInterval(timerId);
-      endGame();
+    class Brainrot {
+      constructor(x, y, fake=false) {
+        this.x = x;
+        this.y = y;
+        this.fake = fake;
+        this.size = difficulty === "hard" ? 25 : 35;
+        this.dx = (Math.random() - 0.5) * (difficulty === "hard" ? 5 : 3);
+        this.dy = (Math.random() - 0.5) * (difficulty === "hard" ? 5 : 3);
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.fillStyle = this.fake ? "gray" : "blue";
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "pink";
+        ctx.font = "bold 14px Arial";
+        ctx.fillText("💀", this.x - 6, this.y + 4);
+      }
+      update() {
+        this.x += this.dx;
+        this.y += this.dy;
+        if (this.x < this.size || this.x > canvas.width - this.size) this.dx *= -1;
+        if (this.y < this.size || this.y > canvas.height - this.size) this.dy *= -1;
+        this.draw();
+      }
     }
-  }, 1000);
-}
 
-canvas.addEventListener("click", (e) => {
-  if (!gameRunning) return;
-  const rect = canvas.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
-
-  for (let i = brainrots.length - 1; i >= 0; i--) {
-    const br = brainrots[i];
-    const dist = Math.hypot(mouseX - br.x, mouseY - br.y);
-    if (dist < br.size) {
-      let me = players[0];
-      if (br.fake) me.score = Math.max(0, me.score - 1);
-      else me.score++;
-      brainrots.splice(i, 1);
-      checkWin(me);
+    class Sparkle {
+      constructor(x, y, color="white") {
+        this.x = x;
+        this.y = y;
+        this.size = Math.random() * 4 + 2;
+        this.color = color;
+        this.dx = (Math.random() - 0.5) * 6;
+        this.dy = (Math.random() - 0.5) * 6;
+        this.alpha = 1;
+      }
+      update() {
+        this.x += this.dx;
+        this.y += this.dy;
+        this.alpha -= 0.03;
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        return this.alpha > 0;
+      }
     }
-  }
-});
 
-function updateScoreboard() {
-  scoreBoard.innerText =
-    `Time: ${roundTime}s | ` +
-    players.map(p => `${p.name}: ${p.score}`).join(" | ");
-}
+    class Confetti {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = Math.random() * 6 + 4;
+        this.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+        this.dx = (Math.random() - 0.5) * 6;
+        this.dy = Math.random() * -6 - 2;
+        this.gravity = 0.2;
+      }
+      update() {
+        this.x += this.dx;
+        this.y += this.dy;
+        this.dy += this.gravity;
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.size, this.size);
+      }
+    }
 
-function animate() {
-  if (!gameRunning) return;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  brainrots.forEach(b => b.draw());
-  players.forEach(p => { p.update(); p.drawCharacter(); });
-  requestAnimationFrame(animate);
-}
+    canvas.addEventListener("click", (e) => {
+      if (!gameRunning) return;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
 
-function checkWin(player) {
-  if (player.score >= targetScore) {
-    endGame();
-  }
-}
+      for (let i = brainrots.length - 1; i >= 0; i--) {
+        const br = brainrots[i];
+        const dist = Math.hypot(mouseX - br.x, mouseY - br.y);
+        if (dist < br.size) {
+          let me = players[0];
+          if (br.fake) {
+            me.score = Math.max(0, me.score - 1);
+            for (let j = 0; j < 8; j++) {
+              sparkles.push(new Sparkle(br.x, br.y, "red"));
+            }
+          } else {
+            me.score++;
+            for (let j = 0; j < 12; j++) {
+              sparkles.push(new Sparkle(br.x, br.y, "lime"));
+            }
+          }
+          brainrots.splice(i, 1);
+          checkWin(me);
+        }
+      }
+    });
 
-function endGame() {
-  gameRunning = false;
-  clearInterval(timerId);
-  timerBar.style.display = "none";
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawPodiumAndWinners();
+    function startGame(mode) {
+      difficulty = mode;
+      timer = 15;
+      targetScore = (mode === "hard") ? 35 : 15;
+      document.getElementById("menu").style.display = "none";
+      canvas.style.display = "block";
+      playAgainBtn.style.display = "none";
 
-  for (let i = 0; i < 200; i++) {
-    confetti.push(new Confetti(canvas.width/2, canvas.height/4));
-  }
-  animateConfetti();
+      brainrots = [];
+      players = [];
+      confetti = [];
+      sparkles = [];
 
-  playAgainBtn.style.display = "block";
-}
+      players.push(new Player("You", false, "yellow"));
+      players.push(new Player("Bot 1", true, "red"));
+      players.push(new Player("Bot 2", true, "green"));
 
-function drawPodiumAndWinners() {
-  const baseY = canvas.height - 100;
-  const podiumWidth = 150;
-  let ranking = [...players].sort((a, b) => b.score - a.score);
+      let count = (mode === "hard") ? 20 : 15;
+      for (let i = 0; i < count; i++) {
+        brainrots.push(new Brainrot(
+          Math.random() * canvas.width,
+          Math.random() * canvas.height,
+          Math.random() < (mode === "hard" ? 0.2 : 0.15)
+        ));
+      }
 
-  ctx.fillStyle = "rgba(0,0,0,0.6)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+      players.forEach(p => p.score = 0);
+      gameRunning = true;
+      updateScoreboard();
+      animate();
 
-  ctx.fillStyle = "#aaa";
-  ctx.fillRect(canvas.width/2 - podiumWidth - 50, baseY - 100, podiumWidth, 100);
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (!gameRunning) return;
+        timer--;
+        timerDisplay.innerText = "Time: " + timer;
+        if (timer <= 0) {
+          endGame();
+        }
+      }, 1000);
+    }
 
-  ctx.save();
-  ctx.shadowColor = "gold"; ctx.shadowBlur = 40;
-  ctx.fillStyle = "#ffd700";
-  ctx.fillRect(canvas.width/2 - podiumWidth/2, baseY - 150, podiumWidth, 150);
-  ctx.restore();
+    function animate() {
+      if (!gameRunning) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      brainrots.forEach(br => br.update());
+      players.forEach(p => p.updateBot());
+      sparkles = sparkles.filter(s => s.update());
+      updateScoreboard();
+      requestAnimationFrame(animate);
+    }
 
-  ctx.fillStyle = "#cd7f32";
-  ctx.fillRect(canvas.width/2 + podiumWidth/2 + 50 - podiumWidth, baseY - 80, podiumWidth, 80);
+    function updateScoreboard() {
+      scoreBoard.innerText = players.map(p => `${p.name}: ${p.score}`).join(" | ");
+    }
 
-  if (ranking[0]) { ranking[0].x = canvas.width/2; ranking[0].y = baseY - 150; ranking[0].drawCharacter(); }
-  if (ranking[1]) { ranking[1].x = canvas.width/2 - podiumWidth; ranking[1].y = baseY - 100; ranking[1].drawCharacter(); }
-  if (ranking[2]) { ranking[2].x = canvas.width/2 + podiumWidth/2 + 10; ranking[2].y = baseY - 80; ranking[2].drawCharacter(); }
+    function checkWin(player) {
+      if (player.score >= targetScore) {
+        endGame();
+      }
+    }
 
-  ctx.font = "24px Arial";
-  ctx.fillStyle = "white";
-  if (ranking[1]) ctx.fillText(`${ranking[1].name} (${ranking[1].score})`, ranking[1].x - 40, ranking[1].y - 60);
-  if (ranking[0]) { ctx.save(); ctx.shadowColor = "gold"; ctx.shadowBlur = 30; ctx.fillStyle = "#fffacd"; ctx.fillText(`${ranking[0].name} (${ranking[0].score})`, ranking[0].x - 40, ranking[0].y - 70); ctx.restore(); }
-  if (ranking[2]) ctx.fillText(`${ranking[2].name} (${ranking[2].score})`, ranking[2].x - 40, ranking[2].y - 60);
-}
+    function endGame() {
+      gameRunning = false;
+      clearInterval(timerInterval);
+      for (let i = 0; i < 200; i++) {
+        confetti.push(new Confetti(canvas.width/2, canvas.height/4));
+      }
+      animateConfetti();
+      playAgainBtn.style.display = "block";
+    }
 
-function animateConfetti() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawPodiumAndWinners();
-  confetti.forEach(c => c.update());
-  if (confetti.length > 0) requestAnimationFrame(animateConfetti);
-}
+    function drawPodiumAndWinners() {
+      const baseY = canvas.height - 100;
+      const podiumWidth = 150;
+      let ranking = [...players].sort((a, b) => b.score - a.score);
 
-function showMenu() {
-  document.getElementById("menu").style.display = "block";
-  canvas.style.display = "none";
-  playAgainBtn.style.display = "none";
-}
-</script>
+      ctx.fillStyle = "rgba(0,0,0,0.8)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#aaa";
+      ctx.fillRect(canvas.width/2 - podiumWidth - 50, baseY - 100, podiumWidth, 100);
+
+      ctx.save();
+      ctx.shadowColor = "gold";
+      ctx.shadowBlur = 40;
+      ctx.fillStyle = "#ffd700";
+      ctx.fillRect(canvas.width/2 - podiumWidth/2, baseY - 150, podiumWidth, 150);
+      ctx.restore();
+
+      ctx.fillStyle = "#cd7f32";
+      ctx.fillRect(canvas.width/2 + podiumWidth/2 + 50 - podiumWidth, baseY - 80, podiumWidth, 80);
+
+      if (ranking[0]) { ranking[0].x = canvas.width/2; ranking[0].y = baseY - 150; ranking[0].drawCharacter(); }
+      if (ranking[1]) { ranking[1].x = canvas.width/2 - podiumWidth; ranking[1].y = baseY - 100; ranking[1].drawCharacter(); }
+      if (ranking[2]) { ranking[2].x = canvas.width/2 + podiumWidth/2 + 10; ranking[2].y = baseY - 80; ranking[2].drawCharacter(); }
+
+      ctx.font = "24px Arial";
+      ctx.fillStyle = "white";
+      if (ranking[1]) ctx.fillText(`${ranking[1].name} (${ranking[1].score})`, ranking[1].x - 40, ranking[1].y - 60);
+      if (ranking[0]) { ctx.save(); ctx.shadowColor = "gold"; ctx.shadowBlur = 30; ctx.fillStyle = "#fffacd"; ctx.fillText(`${ranking[0].name} (${ranking[0].score})`, ranking[0].x - 40, ranking[0].y - 70); ctx.restore(); }
+      if (ranking[2]) ctx.fillText(`${ranking[2].name} (${ranking[2].score})`, ranking[2].x - 40, ranking[2].y - 60);
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawPodiumAndWinners();
+      confetti.forEach(c => c.update());
+      if (confetti.length > 0) {
+        requestAnimationFrame(animateConfetti);
+      }
+    }
+
+    function restartGame() {
+      document.getElementById("menu").style.display = "block";
+      canvas.style.display = "none";
+      playAgainBtn.style.display = "none";
+      timerDisplay.innerText = "Time: 15";
+    }
+  </script>
 </body>
 </html>
